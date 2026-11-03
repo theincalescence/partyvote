@@ -1,0 +1,75 @@
+{% if any_reveals and not submissions_open %}
+    <h2 style="font-size: 3.2em; margin-top: 0; margin-bottom: 12px; color: #ff9900; font-family: 'Creepster', cursive; letter-spacing: 2px;">🏆 Contest Results 🏆</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; align-items: start; height: auto; width: 100%; box-sizing: border-box;">
+        {% for slug, data in category_data.items() %}
+            <div style="background: rgba(0,0,0,0.4); padding: 15px 12px; border-radius: 12px; border: 3px dashed #FFF200; min-width: 0; box-sizing: border-box; overflow: hidden;">
+                <h3 style="font-family: Creepster; font-size: clamp(1.4em, 1.8vw, 2.2em); margin-top: 0; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ data.name }}</h3>
+                
+                {% if data.reveal_level > 0 %}
+                    {% if data.reveal_level >= 3 and data.results|length >= 1 %}
+                        <div class="entry-card" style="border: 4px solid #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); background: #fff9c4; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; text-align: left; width: 100%; min-width: 0; box-sizing: border-box;">
+                            <img src="{{ url_for('main.uploaded_file', filename=data.results[0]['image_path']) }}" style="width: 13vh; height: 13vh; max-width: 130px; max-height: 130px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 2px solid #333;">
+                            <div style="overflow: hidden; min-width: 0; flex: 1;">
+                                <h4 style="margin: 0 0 2px 0; font-size: 1.6em; font-family: sans-serif; color: #4B2096; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🥇 1st Place</h4>
+                                <p style="color:#000; font-weight:bold; font-size:clamp(1.5em, 1.8vw, 2.2em); margin: 0; font-family: 'Oregano', cursive; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                                    {{ data.results[0]['name'] }}
+                                </p>
+                                <p style="margin: 2px 0 0 0; font-size: 1.2em; color: #555; font-family: sans-serif; font-weight: bold;">
+                                    {{ data.results[0]['vote_count'] }} Votes
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if data.reveal_level >= 2 and data.results|length >= 2 %}
+                        <div class="entry-card" style="border: 4px solid #C0C0C0; box-shadow: 0 4px 10px rgba(192, 192, 192, 0.6); background: #f5f5f5; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; text-align: left; width: 100%; min-width: 0; box-sizing: border-box;">
+                            <img src="{{ url_for('main.uploaded_file', filename=data.results[1]['image_path']) }}" style="width: 10vh; height: 10vh; max-width: 105px; max-height: 105px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 2px solid #333;">
+                            <div style="overflow: hidden; min-width: 0; flex: 1;">
+                                <h4 style="margin: 0 0 2px 0; font-size: 1.3em; font-family: sans-serif; color: #4B2096; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🥈 2nd Place</h4>
+                                <p style="color:#000; font-weight:bold; font-size:clamp(1.3em, 1.5vw, 1.8em); margin: 0; font-family: 'Oregano', cursive; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                                    {{ data.results[1]['name'] }}
+                                </p>
+                                <p style="margin: 2px 0 0 0; font-size: 1.1em; color: #555; font-family: sans-serif; font-weight: bold;">
+                                    {{ data.results[1]['vote_count'] }} Votes
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if data.reveal_level >= 1 and data.results|length >= 3 %}
+                        <div class="entry-card" style="border: 4px solid #CD7F32; box-shadow: 0 4px 8px rgba(0,0,0,0.5); background: white; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; padding: 8px 12px; text-align: left; width: 100%; min-width: 0; box-sizing: border-box;">
+                            <img src="{{ url_for('main.uploaded_file', filename=data.results[2]['image_path']) }}" style="width: 8vh; height: 8vh; max-width: 85px; max-height: 85px; object-fit: cover; border-radius: 8px; flex-shrink: 0; border: 2px solid #333;">
+                            <div style="overflow: hidden; min-width: 0; flex: 1;">
+                                <h4 style="margin: 0 0 2px 0; font-size: 1.1em; font-family: sans-serif; color: #4B2096; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🥉 3rd Place</h4>
+                                <p style="color:#000; font-weight:bold; font-size:clamp(1.1em, 1.3vw, 1.5em); margin: 0; font-family: 'Oregano', cursive; line-height: 1.05; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word;">
+                                    {{ data.results[2]['name'] }}
+                                </p>
+                                <p style="margin: 2px 0 0 0; font-size: 0.95em; color: #555; font-family: sans-serif; font-weight: bold;">
+                                    {{ data.results[2]['vote_count'] }} Votes
+                                </p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p style="font-size: 1.6em; color: #aaa; margin-top: 30px;">Awaiting reveal...</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div style="display: flex; align-items: center; justify-content: center; gap: 5vw; margin: 2vh 0; width: 100%;">
+        <img src="{{ url_for('main.serve_qr') }}" style="width: 38vh; height: 38vh; max-width: 420px; max-height: 420px; object-fit: contain; border: 6px solid #FFF200; border-radius: 20px; background: white; padding: 15px; box-shadow: 0 6px 20px rgba(0,0,0,0.6); flex-shrink: 0;">
+        <div style="text-align: left;">
+            {% if submissions_open %}
+                <h3 style="font-size: 4em; color: #FFF200; font-family: 'Creepster', cursive; font-weight: normal; margin: 0 0 1.5vh 0; letter-spacing: 2px;">📸 Submissions are OPEN! 📸</h3>
+                <p style="font-size: 3em; margin: 0; font-family: 'Oregano', cursive; line-height: 1.25;">Scan the QR code to upload your<br>costumes and pumpkins!</p>
+            {% elif voting_open %}
+                <h3 style="font-size: 4em; color: #FFF200; font-family: 'Creepster', cursive; font-weight: normal; margin: 0 0 1.5vh 0; letter-spacing: 2px;">🗳️ Voting is LIVE! 🗳️</h3>
+                <p style="font-size: 3em; margin: 0; font-family: 'Oregano', cursive; line-height: 1.25;">Scan the QR code to cast your votes!<br>Voting closes at 10 PM!</p>
+            {% else %}
+                <h3 style="font-size: 4em; color: #FFF200; font-family: 'Creepster', cursive; font-weight: normal; margin: 0 0 1.5vh 0; letter-spacing: 2px;">🎃 Voting is CLOSED! 🎃</h3>
+                <p style="font-size: 3em; margin: 0; font-family: 'Oregano', cursive; line-height: 1.25;">Tallying up the votes!<br>Winners announced shortly!</p>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

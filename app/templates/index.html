@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Home - RouwenRick Manor{% endblock %}
+
+{% block content %}
+<h2>{{ status_text }}</h2>
+<p>Select a category below:</p>
+{% for slug, name in categories.items() %}
+    <a href="{{ url_for('main.category', slug=slug) }}" class="btn">{{ name }}</a><br>
+{% endfor %}
+{% endblock %}

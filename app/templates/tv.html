@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% set is_tv = True %}
+{% block title %}TV Dashboard - RouwenRick Manor{% endblock %}
+
+{% block content %}
+<div id="tv-content-box" style="width: 100%; min-width: 0;">
+    <h2 style="margin-bottom: 10px;">Loading Live Dashboard...</h2>
+</div>
+
+<script>
+    setInterval(async function() {
+        try {
+            let response = await fetch("{{ url_for('tv.tv_content') }}");
+            if (response.ok) {
+                let data = await response.json();
+                document.getElementById('tv-content-box').innerHTML = data.html;
+                
+                let headerEl = document.getElementById('dynamic-header');
+                let footerEl = document.getElementById('tv-footer');
+                let decorEl = document.getElementById('tv-decor');
+                
+                if (data.compact) {
+                    headerEl.innerHTML = `<div style="font-family: 'Oregano', cursive; font-size: 2.2em; color: #FFF200; margin-bottom: 0px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">2026 RouwenRick Manor</div><h1 style="font-size: 3.8em; margin-bottom: 5px;">HALLOWEEN PARTY</h1>`;
+                    if (footerEl) footerEl.style.display = 'none';
+                    if (decorEl) decorEl.style.display = 'none';
+                } else {
+                    headerEl.innerHTML = `<div style="font-family: 'Oregano', cursive; font-size: 2.8em; color: #FFF200; margin-bottom: -10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">2026 RouwenRick Manor</div><h1 style="font-size: 5.5em;">HALLOWEEN<br>PARTY</h1>`;
+                    if (footerEl) footerEl.style.display = 'block';
+                    if (decorEl) decorEl.style.display = 'block';
+                }
+            }
+        } catch (e) {
+            console.log("Fetch error", e);
+        }
+    }, 1500);
+</script>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% set show_nav = True %}
+{% block title %}{{ cat_name }} - RouwenRick Manor{% endblock %}
+
+{% block content %}
+<h2>{{ cat_name }}</h2>
+
+{% if submissions_open %}
+    <div class="form-container">
+        <form method="post" enctype="multipart/form-data">
+            <input type="text" name="name" placeholder="Your Name(s)" required>
+            <input type="file" name="photo" accept="image/*" required>
+            <input type="submit" class="btn" value="Submit Entry">
+        </form>
+    </div>
+    <h3 style="font-family: 'Creepster', cursive; font-size: 2em; letter-spacing: 2px;">Current Submissions</h3>
+    {% if not entries %}
+        <p>No entries yet! Be the first!</p>
+    {% else %}
+        <div class="grid">
+            {% for e in entries %}
+                <div class="entry-card">
+                    <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}">
+                    <p class="card-name">{{ e['name'] }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+{% elif category_voting_allowed %}
+    {% if already_voted %}
+        <h3>You have voted in this category!</h3>
+        <p style="font-size: 1.5em; color: #FFF200;">Keep an eye on the TV for the results at the end of the night!</p>
+        <script>
+            if (!localStorage.getItem('party_voter_uuid')) {
+                localStorage.setItem('party_voter_uuid', '{{ voter_uuid }}');
+            }
+        </script>
+        {% if entries %}
+            <div class="grid">
+                {% for e in entries %}
+                    <div class="entry-card">
+                        <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}">
+                        <p class="card-name">{{ e['name'] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p>Select your favorite below to cast your vote!</p>
+        {% if not entries %}
+            <p>No entries were submitted for this category.</p>
+        {% else %}
+            <form method="post">
+                <input type="hidden" name="device_fp" id="device_fp" value="unknown">
+                <div class="grid">
+                    {% for e in entries %}
+                        <div class="entry-card">
+                            <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}">
+                            <label><input type="radio" name="entry_id" value="{{ e['id'] }}" required> {{ e['name'] }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <input type="submit" class="btn" value="Lock In Vote" style="margin-top:30px;">
+            </form>
+            <script>
+                (function() {
+                    try {
+                        var canvas = document.createElement('canvas');
+                        var ctx = canvas.getContext('2d');
+                        ctx.textBaseline = "alphabetic";
+                        ctx.font = "14px 'Arial'";
+                        ctx.fillStyle = "#f60";
+                        ctx.fillRect(125,1,62,20);
+                        ctx.fillStyle = "#069";
+                        ctx.fillText("RouwenRickHalloween2026", 2, 15);
+                        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                        ctx.fillText("RouwenRickHalloween2026", 4, 17);
+                        
+                        var str = canvas.toDataURL() + navigator.userAgent + screen.width + "x" + screen.height + screen.colorDepth;
+                        var hash = 0;
+                        for (var i = 0; i < str.length; i++) {
+                            var char = str.charCodeAt(i);
+                            hash = ((hash << 5) - hash) + char;
+                            hash |= 0;
+                        }
+                        var fp = Math.abs(hash).toString(16);
+                        var el = document.getElementById('device_fp');
+                        if (el) el.value = fp;
+                    } catch(e) {}
+                    
+                    var storedUuid = localStorage.getItem('party_voter_uuid');
+                    if (storedUuid && !document.cookie.includes('voter_uuid=')) {
+                        document.cookie = "voter_uuid=" + storedUuid + "; max-age=" + (60*60*24*30) + "; path=/";
+                    }
+                })();
+            </script>
+        {% endif %}
+    {% endif %}
+
+{% else %}
+    <h3 style="color: #ff9900;">Voting is closed for this category!</h3>
+    <p style="font-size: 1.5em; color: #FFF200;">Winners are being announced on the TV!</p>
+    {% if entries %}
+        <div class="grid">
+            {% for e in entries %}
+                <div class="entry-card">
+                    <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}">
+                    <p class="card-name">{{ e['name'] }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}

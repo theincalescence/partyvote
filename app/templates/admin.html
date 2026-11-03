@@ -1,5 +1,6 @@
-{% extends 'base.html' %}
-{% block title %}Admin Dashboard - RouwenRick Manor{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Party Vote{% endblock %}
 
 {% block content %}
 <h2>Admin Dashboard</h2>
@@ -24,7 +25,11 @@
 <a href="{{ url_for('tv.tv_dashboard') }}" class="btn" target="_blank" style="background-color: #ff9900;">Launch TV Dashboard</a>
 
 <hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<h2>🏆 Reveal Controls & Full Standings 🏆</h2>
+<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <div><h2>🏆</h2></div>
+  <div style="text-align: center;"><h2>Reveal Controls & Full Standings</h2></div>
+  <div><h2>🏆</h2></div>
+</div>
 
 {% for slug, cat_name in categories.items() %}
     <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
@@ -58,7 +63,11 @@
 {% endfor %}
 
 <hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<h2>🗑️ Manage Entries 🗑️</h2>
+<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <div><h2>🗑️</h2></div>
+  <div style="text-align: center;"><h2>Manage Entries</h2></div>
+  <div><h2>🗑️</h2></div>
+</div>
 <div style="text-align: left; max-height: 550px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
     {% if not all_entries %}
         <p style="text-align:center;">No entries yet.</p>
@@ -70,7 +79,7 @@
                     <div>
                         <div style="font-weight: bold; font-family: sans-serif; font-size: 1.2em;">{{ e['name'] }}</div>
                         <div style="font-size: 0.9em; color: #ccc; font-family: sans-serif; margin-top: 3px;">
-                            {{ e['category'] }} &bull; <span style="background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold;">{{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}</span>
+                            {{ e['category'] }} <br><span style="background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold;">{{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}</span>
                         </div>
                     </div>
                 </div>
@@ -90,23 +99,27 @@
 </div>
 
 <hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<h2>🛠️ Danger Zone 🛠️</h2>
+<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <div><h2>🛠️</h2></div>
+  <div style="text-align: center;"><h2>Danger Zone</h2></div>
+    <div><h2>🛠️</h2></div>
+</div>
 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
     <form method="post" onsubmit="return confirm('This will generate 10 random entries and random votes. Proceed?');">
-        <button name="action" value="populate_test" class="btn" style="background-color: #4CAF50; color: white; font-family: sans-serif; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
+        <button name="action" value="populate_test" class="btn" style="background-color: #4CAF50; color: white; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
     </form>
     <form action="{{ url_for('admin.reset') }}" method="post" onsubmit="return confirm('WARNING: This deletes all photos and votes! Are you sure?');">
-        <button class="btn" style="background-color: #ff4444; color: white; font-family: sans-serif; font-size: 18px; border: none; box-shadow: none;">RESET ALL DATA</button>
+        <button class="btn" style="background-color: #ff4444; color: white; font-size: 18px; border: none; box-shadow: none;">RESET ALL DATA</button>
     </form>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function(event) { 
-        var scrollpos = sessionStorage.getItem('scrollpos');
+        var scrollpos = sessionStorage.getItem(scrollpos);
         if (scrollpos) window.scrollTo(0, scrollpos);
     });
     window.onbeforeunload = function(e) {
-        sessionStorage.setItem('scrollpos', window.scrollY);
+        sessionStorage.setItem(scrollpos, window.scrollY);
     };
 </script>
 {% endblock %}

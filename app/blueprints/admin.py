@@ -2,10 +2,10 @@ import os
 import random
 import uuid
 import logging
-from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, flash
 from PIL import Image
 from app.db import get_db
-from app.utils import requires_auth, are_submissions_open, is_voting_open, get_reveal_level, rotate_entry_image
+from app.utils import requires_auth, are_submissions_open, is_voting_open, get_reveal_level, rotate_entry_image, generate_qr_code, get_current_qr_url
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 logger = logging.getLogger(__name__)
@@ -20,7 +20,30 @@ def index():
         try:
             action = request.form.get('action')
             logger.info(f"Admin action initiated: {action}")
-            
+
+            # Handle QR code generation if it's a QR form submission
+            if action == 'generate_qr':
+                qr_url = request.form.get('qr_url', 'http://localhost:5000')
+                
+                # Update the QR URL in database
+                try:
+                    conn.execute('UPDATE state SET qr_url = ?', (qr_url,))
+                    conn.commit()
+                    
+                    # Generate QR code (overwriting previous)
+                    qr_filename = generate_qr_code(qr_url)
+                    
+                    if qr_filename:
+                        flash('QR code generated successfully!', 'success')
+                    else:
+                        flash('Error generating QR code.', 'error')
+                        
+                except Exception as e:
+                    logger.error(f"Error generating QR code: {e}")
+                    flash('Error generating QR code.', 'error')
+                    
+                return redirect(url_for('admin.index'))
+
             if action == 'toggle_submissions':
                 try:
                     current = are_submissions_open()
@@ -136,6 +159,8 @@ def index():
             GROUP BY e.id
             ORDER BY e.category, vote_count DESC, e.id DESC
         ''').fetchall()
+
+        current_qr_url = get_current_qr_url()
         
         logger.info("Admin dashboard rendered successfully")
         return render_template(
@@ -145,7 +170,8 @@ def index():
             categories=categories,
             standings=standings,
             reveal_levels=reveal_levels,
-            all_entries=all_entries
+            all_entries=all_entries,
+            qr_url=current_qr_url
         )
         
     except Exception as e:

@@ -1,12 +1,56 @@
 import os
 import uuid
 import logging
+import qrcode
 from functools import wraps
 from flask import request, make_response, current_app
 from PIL import Image, ImageOps
 from app.db import get_db
+from qrcode.constants import ERROR_CORRECT_L
 
 logger = logging.getLogger(__name__)
+
+def generate_qr_code(url):
+    """Generate QR code from URL and save it as QR.png in data directory"""
+    try:
+        # Create QR code instance
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        
+        # Add data to QR code
+        qr.add_data(url)
+        qr.make(fit=True)
+        
+        # Create image
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Save QR code image as QR.png (overwriting previous)
+        qr_filename = "QR.png"
+        qr_path = os.path.join(current_app.config['DATA_DIR'], qr_filename)
+        img.save(qr_path)
+        
+        return qr_filename
+    except Exception as e:
+        print(f"Error generating QR code: {e}")
+        return None
+
+def get_current_qr_url():
+    """Retrieve the currently set QR URL from database"""
+    try:
+        conn = get_db()
+        row = conn.execute('SELECT qr_url FROM state LIMIT 1').fetchone()
+        
+        if row:
+            return row['qr_url']
+        else:
+            return 'http://localhost:5000'
+    except Exception as e:
+        print(f"Error retrieving QR URL: {e}")
+        return 'http://localhost:5000'
 
 def are_submissions_open():
     conn = get_db()

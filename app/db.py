@@ -42,15 +42,7 @@ def init_db(app):
             INSERT OR IGNORE INTO state (key, value) VALUES ('reveal_couples', '0');
             INSERT OR IGNORE INTO state (key, value) VALUES ('reveal_pumpkins', '0');
         ''')
-        
-        # Verify schema column migration
-        cols = [col[1] for col in conn.execute("PRAGMA table_info(votes)").fetchall()]
-        if 'fingerprint' not in cols:
-            try:
-                conn.execute("ALTER TABLE votes ADD COLUMN fingerprint TEXT DEFAULT 'unknown'")
-            except sqlite3.OperationalError:
-                pass
-                
+                      
         conn.commit()
 
 def init_app(app):

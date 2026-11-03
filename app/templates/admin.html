@@ -1,6 +1,7 @@
+# pyright: reportImportCycles=false, reportGeneralTypeIssues=false
 {% extends "base.html" %}
 
-{% block title %}Admin Panel - Party Vote{% endblock %}
+{% block title %}Admin Panel - RouwenRick Manor{% endblock %}
 
 {% block content %}
 <h2>Admin Dashboard</h2>
@@ -115,11 +116,11 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function(event) { 
-        var scrollpos = sessionStorage.getItem(scrollpos);
+        var scrollpos = sessionStorage.getItem("scrollpos");
         if (scrollpos) window.scrollTo(0, scrollpos);
     });
     window.onbeforeunload = function(e) {
-        sessionStorage.setItem(scrollpos, window.scrollY);
+        sessionStorage.setItem("scrollpos", window.scrollY);
     };
 </script>
 {% endblock %}

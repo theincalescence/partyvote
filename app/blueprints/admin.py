@@ -10,6 +10,63 @@ from app.utils import requires_auth, are_submissions_open, is_voting_open, get_r
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 logger = logging.getLogger(__name__)
 
+
+def build_broadcast_drafts(categories, standings, target_url):
+    url = target_url or "http://localhost:5000"
+
+    # 1. Submissions Open
+    draft_submissions = (
+        f"🎃 Costume & Pumpkin submissions are OPEN! "
+        f"Snap a picture and upload your entry here: {url} "
+        f"(or scan the TV screen) before submissions lock!"
+    )
+
+    # 2. Voting Live
+    draft_voting = (
+        f"👻 Voting is officially LIVE! "
+        f"Check out all the entries and cast your ballots now: {url}\n"
+        f"May the best costume and pumpkin win!"
+    )
+
+    # 3. 10-Minute Warning
+    draft_warning = (
+        f"⏳ Final call! Voting closes in 10 minutes! "
+        f"Get your votes in now at {url} before the polls lock."
+    )
+
+    # 4. Winners Podium (built directly from category standings)
+    medals = ["🥇", "🥈", "🥉"]
+    winner_lines = ["🏆 RouwenRick Manor: The winners are officially crowned!"]
+    has_standings = False
+
+    for slug, cat_name in categories.items():
+        cat_rows = standings.get(slug, [])
+        if cat_rows:
+            has_standings = True
+            winner_lines.append(f"\n{cat_name}:")
+            for i, r in enumerate(cat_rows[:3]):
+                winner_lines.append(
+                    f"{medals[i]} {r['name']} ({r['vote_count']} votes)"
+                )
+
+    if not has_standings:
+        winner_lines.append(
+            "\n(Winners will populate automatically once votes are cast!)"
+        )
+
+    winner_lines.append(
+        "\nIf you placed in the top 3 and already headed out, text the host to grab your prize!"
+    )
+    draft_winners = "\n".join(winner_lines)
+
+    return {
+        "submissions": draft_submissions,
+        "voting": draft_voting,
+        "warning": draft_warning,
+        "winners": draft_winners,
+    }
+
+
 @admin_bp.route('/', methods=['GET', 'POST'])
 @requires_auth
 def index():
@@ -162,6 +219,9 @@ def index():
 
         current_qr_url = get_current_qr_url()
         
+        # Build Partiful broadcast drafts using live URL and calculated standings
+        drafts = build_broadcast_drafts(categories, standings, current_qr_url)
+        
         logger.info("Admin dashboard rendered successfully")
         return render_template(
             'admin.html',
@@ -171,7 +231,8 @@ def index():
             standings=standings,
             reveal_levels=reveal_levels,
             all_entries=all_entries,
-            qr_url=current_qr_url
+            qr_url=current_qr_url,
+            drafts=drafts
         )
         
     except Exception as e:

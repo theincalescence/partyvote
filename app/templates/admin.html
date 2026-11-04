@@ -5,7 +5,7 @@
 {% block content %}
 <h2>Admin Dashboard</h2>
 
-<div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
     <p style="margin: 5px 0;">Submissions: <b style="color: {{ '#4CAF50' if submissions_open else '#ff4444' }};">{{ 'OPEN' if submissions_open else 'CLOSED' }}</b></p>
     <p style="margin: 5px 0;">Voting: <b style="color: {{ '#4CAF50' if voting_open else '#ff4444' }};">{{ 'OPEN' if voting_open else 'CLOSED' }}</b></p>
     <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
@@ -24,6 +24,80 @@
 
 <a href="{{ url_for('tv.tv_dashboard') }}" class="btn" target="_blank" style="background-color: #ff9900;">Launch TV Dashboard</a>
 
+
+<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
+<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+  <div><h2>📣</h2></div>
+  <div style="text-align: center;"><h2>Message Center</h2></div>
+  <div><h2>📣</h2></div>
+</div>
+
+<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
+  <p style="margin: 0 0 16px 0; font-size: 0.9em; color: #ccc; text-align: center;">
+    Pre-formatted blasts with the active portal URL and live results.<br>Tap to copy and paste directly into Partiful or Luma.
+  </p>
+
+  <!-- 1. Submissions Open -->
+  <div style="margin-bottom: 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+        1. Submissions Open
+      </label>
+      <button type="button" class="copy-btn" data-target="draft-sub"
+              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+        📋 Copy
+      </button>
+    </div>
+    <textarea id="draft-sub" readonly rows="4"
+              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.submissions }}</textarea>
+  </div>
+
+  <!-- 2. Voting Open -->
+  <div style="margin-bottom: 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+        2. Voting Live
+      </label>
+      <button type="button" class="copy-btn" data-target="draft-vote"
+              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+        📋 Copy
+      </button>
+    </div>
+    <textarea id="draft-vote" readonly rows="4"
+              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.voting }}</textarea>
+  </div>
+
+  <!-- 3. 10-Minute Warning -->
+  <div style="margin-bottom: 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+        3. 10-Minute Warning
+      </label>
+      <button type="button" class="copy-btn" data-target="draft-warn"
+              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+        📋 Copy
+      </button>
+    </div>
+    <textarea id="draft-warn" readonly rows="3"
+              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.warning }}</textarea>
+  </div>
+
+  <!-- 4. Final Winners Podium -->
+  <div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+        4. Winners Announcement
+      </label>
+      <button type="button" class="copy-btn" data-target="draft-win"
+              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+        📋 Copy
+      </button>
+    </div>
+    <textarea id="draft-win" readonly rows="6"
+              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.winners }}</textarea>
+  </div>
+</div>
+
 <hr style="border: 1px dashed #FFF200; margin: 30px 0;">
 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
   <div><h2>🏆</h2></div>
@@ -32,7 +106,7 @@
 </div>
 
 {% for slug, cat_name in categories.items() %}
-    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+    <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
         <h3 style="margin-top:0;">{{ cat_name }}</h3>
         
         {% if standings[slug] %}
@@ -68,7 +142,7 @@
   <div style="text-align: center;"><h2>Manage Entries</h2></div>
   <div><h2>🗑️</h2></div>
 </div>
-<div style="text-align: left; max-height: 550px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
     {% if not all_entries %}
         <p style="text-align:center;">No entries yet.</p>
     {% else %}
@@ -111,23 +185,29 @@
     <input type="hidden" name="action" value="generate_qr">
     
     <div>
-      <label for="qr_url" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; margin-bottom: 6px; text-transform: uppercase;">
-        Portal URL
-      </label>
       <input type="url" id="qr_url" name="qr_url" 
              value="{{ qr_url or 'http://localhost:5000' }}" required
              placeholder="https://..."
              style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 16px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; -webkit-appearance: none;">
     </div>
     
-    <button type="submit" class="btn" style="font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; width: 100%; margin: 0 auto; -webkit-tap-highlight-color: transparent;">
-      Update QR Code
-    </button>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="submit" class="btn" 
+              style="flex: 2; min-width: 160px; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin: 0; -webkit-tap-highlight-color: transparent;">
+        Update QR Code
+      </button>
+
+      <button type="button" 
+              onclick="document.getElementById('qr_url').value='http://localhost:5000'; this.form.submit();"
+              style="flex: 1; min-width: 140px; font-weight: bold; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent;">
+        ↺ Localhost
+      </button>
+    </div>
   </form>
 
   {% if qr_url %}
   <!-- Compact Preview -->
-  <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-family: sans-serif;">
+  <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
     <div style="background: #ffffff; padding: 8px; border-radius: 8px; border: 2px solid #FFF200; display: inline-flex; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
       <img src="{{ url_for('main.serve_qr') }}" alt="QR Code" style="display: block; width: 120px; height: 120px; object-fit: contain;">
     </div>
@@ -148,10 +228,10 @@
   <div style="text-align: center;"><h2>Danger Zone</h2></div>
     <div><h2>🛠️</h2></div>
 </div>
-<div style="text-align: left; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
 <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
     <form method="post" onsubmit="return confirm('This will generate 10 random entries and random votes. Proceed?');">
-        <button name="action" value="populate_test" class="btn" style="background-color: #4CAF50; color: white; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
+        <button name="action" value="populate_test_data" class="btn" style="background-color: #4CAF50; color: white; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
     </form>
     <form action="{{ url_for('admin.reset') }}" method="post" onsubmit="return confirm('WARNING: This deletes all photos and votes! Are you sure?');">
         <button class="btn" style="background-color: #ff4444; color: white; font-size: 18px; border: none; box-shadow: none;">RESET ALL DATA</button>
@@ -163,7 +243,41 @@
     document.addEventListener("DOMContentLoaded", function(event) { 
         var scrollpos = sessionStorage.getItem("scrollpos");
         if (scrollpos) window.scrollTo(0, scrollpos);
+
+        // Copy button handler with feedback
+        document.querySelectorAll('.copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var targetId = this.getAttribute('data-target');
+                var textarea = document.getElementById(targetId);
+                if (!textarea) return;
+
+                function setCopiedState() {
+                    var originalText = btn.innerHTML;
+                    btn.innerHTML = '✓ Copied!';
+                    btn.style.backgroundColor = '#4CAF50';
+                    btn.style.color = '#ffffff';
+                    setTimeout(function() {
+                        btn.innerHTML = originalText;
+                        btn.style.backgroundColor = '#FFF200';
+                        btn.style.color = '#000000';
+                    }, 2000);
+                }
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textarea.value).then(setCopiedState).catch(function() {
+                        textarea.select();
+                        document.execCommand('copy');
+                        setCopiedState();
+                    });
+                } else {
+                    textarea.select();
+                    document.execCommand('copy');
+                    setCopiedState();
+                }
+            });
+        });
     });
+
     window.onbeforeunload = function(e) {
         sessionStorage.setItem("scrollpos", window.scrollY);
     };

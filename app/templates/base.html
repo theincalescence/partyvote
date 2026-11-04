@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}RouwenRick Manor Halloween{% endblock %}</title>
+    <title>{% block title %}{{ branding.event_location }}{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oregano&display=swap" rel="stylesheet">
@@ -22,13 +22,20 @@
         {% endblock %}
         
         {% if show_nav %}
-            <a href="{{ url_for('main.index') }}" class="back-link">&larr; Back to Categories</a>
+            <a href="{{ url_for('main.index') }}" class="back-link" style="font-family: 'Oregano';">&larr; Back to Categories</a>
         {% endif %}
 
         <div id="dynamic-header" style="width: 100%;">
             {% block header %}
-            <div style="font-family: 'Oregano', cursive; font-size: 2.8em; color: #FFF200; margin-bottom: -10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">2026 RouwenRick Manor</div>
-            <h1 style="font-size: {% if is_tv %}5.5em{% else %}3.5em{% endif %};">HALLOWEEN<br>PARTY</h1>
+            <!-- Cursive Accent: Year + Location -->
+            <div style="font-family: 'Oregano', cursive; font-size: 2.8em; color: #FFF200; margin-bottom: -10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.6);">
+                {{ branding.event_year }} {{ branding.event_location }}
+            </div>
+            
+            <!-- Hero Stacked Marquee -->
+            <h1 style="font-size: {% if is_tv %}5.5em{% else %}3.5em{% endif %}; line-height: 1.05; word-break: break-word; margin: 10px 0;">
+                {{ branding.event_title_line1 }}{% if branding.event_title_line2 %}<br>{{ branding.event_title_line2 }}{% endif %}
+            </h1>
             {% endblock %}
         </div>
 

@@ -5,7 +5,7 @@ import logging
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, flash
 from PIL import Image
 from app.db import get_db
-from app.utils import requires_auth, are_submissions_open, is_voting_open, get_reveal_level, rotate_entry_image, generate_qr_code, get_current_qr_url
+from app.utils import requires_auth, are_submissions_open, is_voting_open, get_reveal_level, rotate_entry_image, generate_qr_code, get_current_qr_url, get_event_branding, set_event_branding
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 logger = logging.getLogger(__name__)
@@ -235,7 +235,24 @@ def index():
                     conn.rollback()
                     flash("Error merging entries.", "error")
                     return "Error merging entries", 500
-                
+            elif action == 'update_event_branding':
+                try:
+                    year = request.form.get('event_year', '2026')
+                    loc = request.form.get('event_location', 'RouwenRick Manor')
+                    l1 = request.form.get('event_title_line1', '').strip()
+                    l2 = request.form.get('event_title_line2', '').strip()
+
+                    if not l1:
+                        flash("Hero Line 1 is required.", "warning")
+                        return redirect(url_for('admin.index'))
+
+                    set_event_branding(year, loc, l1, l2)
+                    flash("Event branding updated successfully!", "success")
+                    logger.info("Event branding updated")
+                except Exception as e:
+                    logger.error(f"Error updating branding: {e}")
+                    flash("Error updating event branding.", "error")
+                    return "Error updating branding", 500              
             elif action == 'populate_test_data':
                 try:
                     # Generate test data for each category
@@ -296,6 +313,8 @@ def index():
         current_qr_url = get_current_qr_url()
         
         # Build Partiful broadcast drafts using live URL and calculated standings
+        branding = get_event_branding()
+        event_slug = f"{branding['event_location']}" # e.g. "RouwenRick Manor"
         drafts = build_broadcast_drafts(categories, standings, current_qr_url)
         
         logger.info("Admin dashboard rendered successfully")

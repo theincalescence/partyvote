@@ -3,6 +3,7 @@ import logging
 from flask import Flask
 from app.config import Config
 from app.db import init_app
+from app.utils import get_event_branding
 
 # Basic logging configuration
 logging.basicConfig(
@@ -32,6 +33,11 @@ def create_app(config_class=Config):
     app.register_blueprint(tv_bp)
     app.register_blueprint(admin_bp)
     
+    @app.context_processor
+    def inject_global_branding():
+        return {
+            'branding': get_event_branding()
+        }
     # Add error handlers
     @app.errorhandler(404)
     def not_found_error(error):

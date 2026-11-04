@@ -125,3 +125,38 @@ def rotate_entry_image(filename):
             logger.error(f"Error rotating image {filename}: {e}")
             return False
     return False
+
+DEFAULT_BRANDING = {
+    'event_year': '2026',
+    'event_location': 'RouwenRick Manor',
+    'event_title_line1': 'HALLOWEEN',
+    'event_title_line2': 'PARTY'
+}
+
+def get_event_branding() -> dict:
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT key, value FROM state WHERE key IN ('event_year', 'event_location', 'event_title_line1', 'event_title_line2')"
+    ).fetchall()
+    
+    branding = dict(DEFAULT_BRANDING)
+    for r in rows:
+        # If the key exists in DB (even as an empty string for line2), respect it
+        if r['value'] is not None:
+            branding[r['key']] = r['value']
+    return branding
+
+def set_event_branding(year: str, location: str, line1: str, line2: str = ""):
+    conn = get_db()
+    updates = [
+        ('event_year', (year or '').strip()),
+        ('event_location', (location or '').strip()),
+        ('event_title_line1', (line1 or '').strip().upper()),
+        ('event_title_line2', (line2 or '').strip().upper())
+    ]
+    for key, val in updates:
+        conn.execute("""
+            INSERT INTO state (key, value) VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value=excluded.value
+        """, (key, val))
+    conn.commit()

@@ -24,7 +24,7 @@
 
 <a href="{{ url_for('tv.tv_dashboard') }}" class="btn" target="_blank" style="background-color: #ff9900;">Launch TV Dashboard</a>
 
-
+<!-- ================= MESSAGE CENTER ================= -->
 <hr style="border: 1px dashed #FFF200; margin: 30px 0;">
 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
   <div><h2>📣</h2></div>
@@ -147,25 +147,69 @@
         <p style="text-align:center;">No entries yet.</p>
     {% else %}
         {% for e in all_entries %}
-            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #555; padding: 10px 0;">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
-                    <div>
-                        <div style="font-weight: bold; font-family: sans-serif; font-size: 1.2em;">{{ e['name'] }}</div>
-                        <div style="font-size: 0.9em; color: #ccc; font-family: sans-serif; margin-top: 3px;">
-                            {{ e['category'] }} <br><span style="background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold;">{{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}</span>
-                        </div>
+            <div style="display: flex; gap: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 14px 0; align-items: flex-start;">
+                
+                <!-- Left: Expanded Thumbnail (Clickable to view full-res in new tab) -->
+                <a href="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" target="_blank" style="display: block; flex-shrink: 0;">
+                    <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" 
+                        style="width: 90px; height: 90px; min-width: 90px; object-fit: cover; border-radius: 8px; border: 1.5px solid #FFF200; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
+                </a>
+
+                <!-- Right: Three-row Stack -->
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; gap: 6px; text-align: left;">
+                    
+                    <!-- Row 1: Title + Inline Edit Pencil -->
+                    <div style="font-weight: bold; font-family: sans-serif; font-size: 1.15em; line-height: 1.25; word-break: break-word;">
+                        <span style="color: #FFF200;">{{ e['name'] }}</span>
+                        <button type="button" class="edit-icon-btn" 
+                                data-entry-id="{{ e['id'] }}" 
+                                data-entry-name="{{ e['name'] }}" 
+                                title="Edit Name"
+                                style="background: none; border: none; cursor: pointer; padding: 0 4px; font-size: 0.85em; vertical-align: middle; display: inline-block;">
+                            ✏️
+                        </button>
                     </div>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <form method="post" style="margin:0;">
-                        <input type="hidden" name="entry_id" value="{{ e['id'] }}">
-                        <button name="action" value="rotate_entry" style="background-color: #2196F3; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Rotate ↻</button>
-                    </form>
-                    <form method="post" style="margin:0;" onsubmit="return confirm('Delete {{ e['name'] }}? This also removes their votes.');">
-                        <input type="hidden" name="entry_id" value="{{ e['id'] }}">
-                        <button name="action" value="delete_entry" style="background-color: #ff4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Delete</button>
-                    </form>
+
+                    <!-- Row 2: Category & Live Vote Badge -->
+                    <div style="font-size: 0.85em; color: #ccc; font-family: sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span>{{ e['category'] }}</span>
+                        <span style="background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold; font-size: 0.9em; white-space: nowrap;">
+                            {{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}
+                        </span>
+                    </div>
+
+                    <!-- Row 3: Action Toolbar -->
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px;">
+                        
+                        <!-- 1. Merge Button -->
+                        <button type="button" class="merge-btn"
+                                data-entry-id="{{ e['id'] }}"
+                                data-entry-name="{{ e['name'] }}"
+                                data-entry-category="{{ e['category'] }}"
+                                data-entry-image="{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
+                                style="background-color: #9C27B0; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                            ⭄ Merge
+                        </button>
+
+                        <!-- 2. Rotate Form & Button -->
+                        <form method="post" style="margin: 0; display: inline-flex;">
+                            <input type="hidden" name="entry_id" value="{{ e['id'] }}">
+                            <button name="action" value="rotate_entry" 
+                                    style="background-color: #2196F3; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                                ↻ Rotate
+                            </button>
+                        </form>
+
+                        <!-- 3. Delete Form & Button -->
+                        <form method="post" style="margin: 0; display: inline-flex;" onsubmit="return confirm('Delete {{ e['name'] }}? This also removes their votes.');">
+                            <input type="hidden" name="entry_id" value="{{ e['id'] }}">
+                            <button name="action" value="delete_entry" 
+                                    style="background-color: #ff4444; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             </div>
         {% endfor %}
@@ -180,7 +224,6 @@
 </div>
 
 <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-  <!-- Form Stack -->
   <form method="POST" action="{{ url_for('admin.index') }}" id="qr-form" style="margin: 0; display: flex; flex-direction: column; gap: 12px;">
     <input type="hidden" name="action" value="generate_qr">
     
@@ -206,7 +249,6 @@
   </form>
 
   {% if qr_url %}
-  <!-- Compact Preview -->
   <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
     <div style="background: #ffffff; padding: 8px; border-radius: 8px; border: 2px solid #FFF200; display: inline-flex; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
       <img src="{{ url_for('main.serve_qr') }}" alt="QR Code" style="display: block; width: 120px; height: 120px; object-fit: contain;">
@@ -226,23 +268,218 @@
 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
   <div><h2>🛠️</h2></div>
   <div style="text-align: center;"><h2>Danger Zone</h2></div>
-    <div><h2>🛠️</h2></div>
+  <div><h2>🛠️</h2></div>
 </div>
 <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-<div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
     <form method="post" onsubmit="return confirm('This will generate 10 random entries and random votes. Proceed?');">
         <button name="action" value="populate_test_data" class="btn" style="background-color: #4CAF50; color: white; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
     </form>
     <form action="{{ url_for('admin.reset') }}" method="post" onsubmit="return confirm('WARNING: This deletes all photos and votes! Are you sure?');">
         <button class="btn" style="background-color: #ff4444; color: white; font-size: 18px; border: none; box-shadow: none;">RESET ALL DATA</button>
     </form>
+  </div>
 </div>
+
+<!-- ================= EDIT ENTRY NAME MODAL ================= -->
+<div id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Edit Entry Name</h3>
+            <button type="button" onclick="closeEditModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
+        </div>
+        <form id="edit-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
+            <input type="hidden" name="action" value="update_entry_name">
+            <input type="hidden" id="edit-entry-id" name="entry_id">
+            <div style="margin-bottom: 20px;">
+                <label for="edit-entry-name" style="display: block; margin-bottom: 8px; color: #fff; font-weight: bold; font-family: sans-serif; font-size: 0.9em;">Name</label>
+                <input type="text" id="edit-entry-name" name="new_name" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.5); color: #fff; font-size: 16px; outline: none;" required>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="closeEditModal()" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Cancel</button>
+                <button type="submit" style="background: #FFF200; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= MERGE ENTRIES MODAL ================= -->
+<div id="merge-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;">
+    <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200; font-family: sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Combine Duplicate Entries</h3>
+            <button type="button" onclick="closeMergeModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
+        </div>
+
+        <form id="merge-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
+            <input type="hidden" name="action" value="merge_entries">
+            <input type="hidden" id="merge-primary-id" name="primary_id">
+
+            <!-- Step 1: Select Duplicate to Absorb -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+                    Select duplicate entry to absorb:
+                </label>
+                <select id="merge-secondary-id" name="secondary_id" required
+                        style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+                </select>
+                <p id="merge-no-candidates" style="display: none; color: #ff9900; font-size: 0.85em; margin: 6px 0 0 0;">
+                    No other entries found in this category to combine with.
+                </p>
+            </div>
+
+            <div id="merge-options-container" style="display: none;">
+                <!-- Step 2: Choose Surviving Name -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+                        Which title should survive?
+                    </label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
+                            <input type="radio" name="keep_name" value="primary" checked>
+                            <span id="label-name-primary" style="font-weight: bold;"></span> (This Entry)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
+                            <input type="radio" name="keep_name" value="secondary">
+                            <span id="label-name-secondary" style="font-weight: bold;"></span> (Duplicate)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 3: Choose Surviving Photo -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+                        Which photo should survive?
+                    </label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <!-- Primary Photo Option -->
+                        <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
+                            <img id="img-preview-primary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="radio" name="keep_photo" value="primary" checked>
+                                <span style="font-size: 0.85em; color: #fff;">Photo A</span>
+                            </div>
+                        </label>
+                        <!-- Secondary Photo Option -->
+                        <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
+                            <img id="img-preview-secondary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <input type="radio" name="keep_photo" value="secondary">
+                                <span style="font-size: 0.85em; color: #fff;">Photo B</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,242,0,0.1); border-left: 3px solid #FFF200; padding: 8px 12px; margin-bottom: 20px; font-size: 0.8em; color: #ddd;">
+                    Votes from both entries will be summed. Any guests who voted for both will have their duplicate vote removed automatically.
+                </div>
+
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button type="button" onclick="closeMergeModal()" 
+                            style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            style="background: #9C27B0; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                        Combine & Merge
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
     document.addEventListener("DOMContentLoaded", function(event) { 
         var scrollpos = sessionStorage.getItem("scrollpos");
         if (scrollpos) window.scrollTo(0, scrollpos);
+
+        // Embed entry records for fast modal population
+        var allEntriesData = [
+            {% for e in all_entries %}
+            {
+                id: "{{ e['id'] }}",
+                name: {{ e['name']|tojson }},
+                category: {{ e['category']|tojson }},
+                image: "{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Merge Modal Open Trigger
+        document.querySelectorAll(".merge-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                var primaryId = this.getAttribute("data-entry-id");
+                var primaryName = this.getAttribute("data-entry-name");
+                var primaryCategory = this.getAttribute("data-entry-category");
+                var primaryImage = this.getAttribute("data-entry-image");
+
+                document.getElementById("merge-primary-id").value = primaryId;
+                document.getElementById("label-name-primary").textContent = primaryName;
+                document.getElementById("img-preview-primary").src = primaryImage;
+
+                // Populate secondary select with entries from same category
+                var select = document.getElementById("merge-secondary-id");
+                select.innerHTML = '<option value="">-- Choose duplicate entry --</option>';
+
+                var candidates = allEntriesData.filter(function(item) {
+                    return item.category === primaryCategory && item.id !== primaryId;
+                });
+
+                if (candidates.length === 0) {
+                    select.style.display = "none";
+                    document.getElementById("merge-no-candidates").style.display = "block";
+                    document.getElementById("merge-options-container").style.display = "none";
+                } else {
+                    select.style.display = "block";
+                    document.getElementById("merge-no-candidates").style.display = "none";
+
+                    candidates.forEach(function(item) {
+                        var opt = document.createElement("option");
+                        opt.value = item.id;
+                        opt.textContent = item.name + " (ID #" + item.id + ")";
+                        select.appendChild(opt);
+                    });
+                }
+
+                document.getElementById("merge-modal").style.display = "flex";
+            });
+        });
+
+        // Dynamic update when secondary entry is selected
+        document.getElementById("merge-secondary-id").addEventListener("change", function() {
+            var selectedId = this.value;
+            var container = document.getElementById("merge-options-container");
+
+            if (!selectedId) {
+                container.style.display = "none";
+                return;
+            }
+
+            var secondary = allEntriesData.find(function(item) {
+                return item.id === selectedId;
+            });
+
+            if (secondary) {
+                document.getElementById("label-name-secondary").textContent = secondary.name;
+                document.getElementById("img-preview-secondary").src = secondary.image;
+                container.style.display = "block";
+            }
+        });
+
+        window.closeMergeModal = function() {
+            document.getElementById("merge-modal").style.display = "none";
+            document.getElementById("merge-options-container").style.display = "none";
+        };
+
+        // Close on dark backdrop click
+        var mergeModal = document.getElementById("merge-modal");
+        mergeModal.addEventListener("click", function(e) {
+            if (e.target === mergeModal) {
+                closeMergeModal();
+            }
+        });
 
         // Copy button handler with feedback
         document.querySelectorAll('.copy-btn').forEach(function(btn) {
@@ -275,6 +512,31 @@
                     setCopiedState();
                 }
             });
+        });
+
+        // Edit Entry Name Modal functionality
+        document.querySelectorAll(".edit-icon-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                var entryId = this.getAttribute("data-entry-id");
+                var entryName = this.getAttribute("data-entry-name");
+                
+                document.getElementById("edit-entry-id").value = entryId;
+                document.getElementById("edit-entry-name").value = entryName;
+                document.getElementById("edit-modal").style.display = "flex";
+                document.getElementById("edit-entry-name").focus();
+            });
+        });
+
+        window.closeEditModal = function() {
+            document.getElementById("edit-modal").style.display = "none";
+        };
+
+        // Close modal when clicking the dark backdrop
+        var modal = document.getElementById("edit-modal");
+        modal.addEventListener("click", function(e) {
+            if (e.target === modal) {
+                closeEditModal();
+            }
         });
     });
 

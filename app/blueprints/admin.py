@@ -146,6 +146,20 @@ def index():
                 except Exception as e:
                     logger.error(f"Error rotating entry: {e}")
                     return "Error rotating entry", 500
+            elif action == 'update_entry_name':
+                try:
+                    entry_id = request.form.get('entry_id')
+                    new_name = request.form.get('new_name', '').strip()
+                    if entry_id and new_name:
+                        conn.execute("UPDATE entries SET name=? WHERE id=?", (new_name, entry_id))
+                        flash(f"Entry name updated to '{new_name}'!", "success")
+                        logger.info(f"Entry {entry_id} name updated to: {new_name}")
+                    else:
+                        flash("Entry name cannot be empty.", "warning")
+                except Exception as e:
+                    logger.error(f"Error updating entry name: {e}")
+                    flash("Error updating entry name.", "error")
+                    return "Error updating entry name", 500
             elif action == 'delete_entry':
                 try:
                     entry_id = request.form.get('entry_id')
@@ -160,6 +174,68 @@ def index():
                 except Exception as e:
                     logger.error(f"Error deleting entry: {e}")
                     return "Error deleting entry", 500
+            elif action == 'merge_entries':
+                try:
+                    primary_id = request.form.get('primary_id')
+                    secondary_id = request.form.get('secondary_id')
+                    keep_photo = request.form.get('keep_photo', 'primary') # 'primary' or 'secondary'
+                    keep_name = request.form.get('keep_name', 'primary')   # 'primary' or 'secondary'
+
+                    if not primary_id or not secondary_id or primary_id == secondary_id:
+                        flash("Invalid entries selected for merge.", "error")
+                        return redirect(url_for('admin.index'))
+
+                    # Fetch both entry records
+                    primary = conn.execute("SELECT * FROM entries WHERE id=?", (primary_id,)).fetchone()
+                    secondary = conn.execute("SELECT * FROM entries WHERE id=?", (secondary_id,)).fetchone()
+
+                    if not primary or not secondary:
+                        flash("One or both entries could not be found.", "error")
+                        return redirect(url_for('admin.index'))
+
+                    # 1. Determine which image to keep and delete the discarded one
+                    upload_folder = current_app.config['UPLOAD_FOLDER']
+                    if keep_photo == 'secondary':
+                        discarded_filename = primary['image_path']
+                        kept_filename = secondary['image_path']
+                        # Point primary entry to the secondary image
+                        conn.execute("UPDATE entries SET image_path=? WHERE id=?", (kept_filename, primary_id))
+                    else:
+                        discarded_filename = secondary['image_path']
+
+                    if discarded_filename:
+                        discarded_path = os.path.join(upload_folder, discarded_filename)
+                        if os.path.isfile(discarded_path):
+                            os.remove(discarded_path)
+
+                    # 2. Determine which name to keep
+                    if keep_name == 'secondary':
+                        conn.execute("UPDATE entries SET name=? WHERE id=?", (secondary['name'], primary_id))
+
+                    # 3. Deduplicate votes: if a voter voted for both, purge the secondary vote
+                    conn.execute("""
+                        DELETE FROM votes 
+                        WHERE entry_id = ? 
+                        AND voter_uuid IN (SELECT voter_uuid FROM votes WHERE entry_id = ?)
+                    """, (secondary_id, primary_id))
+
+                    # 4. Reassign remaining secondary votes to the primary entry
+                    conn.execute("UPDATE votes SET entry_id = ? WHERE entry_id = ?", (primary_id, secondary_id))
+
+                    # 5. Delete the duplicate entry record
+                    conn.execute("DELETE FROM entries WHERE id=?", (secondary_id,))
+
+                    conn.commit()
+                    flash(f"Successfully consolidated duplicate into '{primary['name']}'!", "success")
+                    logger.info(f"Merged entry {secondary_id} into {primary_id}")
+                    return redirect(url_for('admin.index'))
+
+                except Exception as e:
+                    logger.error(f"Error merging entries: {e}")
+                    conn.rollback()
+                    flash("Error merging entries.", "error")
+                    return "Error merging entries", 500
+                
             elif action == 'populate_test_data':
                 try:
                     # Generate test data for each category
@@ -264,3 +340,4 @@ def reset():
         logger.error(f"Error resetting database: {e}")
         conn.rollback()
         return "Error resetting database", 500
+

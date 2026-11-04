@@ -2,603 +2,877 @@
 
 {% block title %}Admin Panel - {{ branding.event_location }}{% endblock %}
 
-{% block content %}
-<h2>Admin Dashboard</h2>
+{% block head %}
+<style>
+  /* Base Card & Layout Rules */
+  .admin-card {
+    background: rgba(18, 18, 22, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 12px;
+    margin-bottom: 22px;
+    border: 1px solid rgba(255, 242, 0, 0.25);
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    scroll-margin-top: 80px; /* Prevents cards from getting stuck behind sticky nav */
+  }
 
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
+  .card-header {
+    background: rgba(255, 242, 0, 0.08);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 242, 0, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s ease;
+  }
+  .card-header:hover {
+    background: rgba(255, 242, 0, 0.14);
+  }
+
+  .card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #FFF200;
+  }
+  .card-title-group h2 {
+    margin: 0;
+    font-size: 1.25em;
+    letter-spacing: 0.5px;
+    display: inline;
+  }
+
+  .card-toggle-icon {
+    color: #FFF200;
+    font-size: 0.9em;
+    transition: transform 0.25s ease;
+  }
+  .admin-card.collapsed .card-toggle-icon {
+    transform: rotate(-90deg);
+  }
+  .admin-card.collapsed .card-body {
+    display: none;
+  }
+  .admin-card.collapsed .card-header {
+    border-bottom: none;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  /* Sticky Quick Navigation Dock */
+  #quick-nav-wrapper {
+    position: sticky;
+    top: 10px;
+    z-index: 900;
+    margin-bottom: 22px;
+  }
+  #quick-nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 8px 12px;
+    background: rgba(14, 14, 18, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 242, 0, 0.35);
+    border-radius: 40px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  #quick-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-pill {
+    text-decoration: none;
+    color: #eee;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: sans-serif;
+    padding: 7px 13px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    white-space: nowrap;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-pill:hover, .nav-pill:active {
+    background: #FFF200;
+    color: #000;
+    border-color: #FFF200;
+  }
+
+  /* Floating Back to Top Button */
+  #back-to-top {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    background: #FFF200;
+    color: #000;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 850;
+    transition: opacity 0.2s, transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #back-to-top:hover {
+    transform: translateY(-2px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="margin-top: 10px;">Admin Dashboard</h2>
+
+<!-- ================= STICKY QUICK NAVIGATION BAR ================= -->
+<div id="quick-nav-wrapper">
+  <div id="quick-nav">
+    <a href="#sec-controls" class="nav-pill">🎛️ Controls</a>
+    <a href="#sec-messages" class="nav-pill">📣 Blasts</a>
+    <a href="#sec-standings" class="nav-pill">🏆 Standings</a>
+    <a href="#sec-entries" class="nav-pill">🖼️ Entries ({{ all_entries|length }})</a>
+    <a href="#sec-qr" class="nav-pill">📱 QR Target</a>
+    <a href="#sec-branding" class="nav-pill">🏷️ Branding</a>
+    <a href="#sec-danger" class="nav-pill">🛠️ Danger</a>
+  </div>
+</div>
+
+<!-- ================= 1. LIVE CONTROLS CARD ================= -->
+<div class="admin-card" id="sec-controls">
+  <div class="card-header" onclick="toggleCard('sec-controls')">
+    <div class="card-title-group">
+      <span>🎛️</span>
+      <h2>Live Controls</h2>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
     <p style="margin: 5px 0;">Submissions: <b style="color: {{ '#4CAF50' if submissions_open else '#ff4444' }};">{{ 'OPEN' if submissions_open else 'CLOSED' }}</b></p>
     <p style="margin: 5px 0;">Voting: <b style="color: {{ '#4CAF50' if voting_open else '#ff4444' }};">{{ 'OPEN' if voting_open else 'CLOSED' }}</b></p>
-    <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 15px;">
-        <form method="post" style="margin: 0;">
-            <button name="action" value="toggle_submissions" class="btn" style="font-size: 18px; width: auto; padding: 10px 18px; margin: 0;">
-                {{ 'Close Submissions' if submissions_open else 'Open Submissions' }}
-            </button>
-        </form>
-        <form method="post" style="margin: 0;">
-            <button name="action" value="toggle_voting" class="btn" style="font-size: 18px; width: auto; padding: 10px 18px; margin: 0; background-color: {{ '#ff9900' if voting_open else '#FFF200' }};">
-                {{ 'Close Voting' if voting_open else 'Open Voting' }}
-            </button>
-        </form>
-    </div>
-</div>
-
-<a href="{{ url_for('tv.tv_dashboard') }}" class="btn" target="_blank" style="background-color: #ff9900;">Launch TV Dashboard</a>
-
-<!-- ================= MESSAGE CENTER ================= -->
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>📣</h2></div>
-  <div style="text-align: center;"><h2>Message Center</h2></div>
-  <div><h2>📣</h2></div>
-</div>
-
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-  <p style="margin: 0 0 16px 0; font-size: 0.9em; color: #ccc; text-align: center;">
-    Pre-formatted blasts with the active portal URL and live results.<br>Tap to copy and paste directly into Partiful or Luma.
-  </p>
-
-  <!-- 1. Submissions Open -->
-  <div style="margin-bottom: 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
-        1. Submissions Open
-      </label>
-      <button type="button" class="copy-btn" data-target="draft-sub"
-              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
-        📋 Copy
-      </button>
-    </div>
-    <textarea id="draft-sub" readonly rows="4"
-              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.submissions }}</textarea>
-  </div>
-
-  <!-- 2. Voting Open -->
-  <div style="margin-bottom: 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
-        2. Voting Live
-      </label>
-      <button type="button" class="copy-btn" data-target="draft-vote"
-              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
-        📋 Copy
-      </button>
-    </div>
-    <textarea id="draft-vote" readonly rows="4"
-              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.voting }}</textarea>
-  </div>
-
-  <!-- 3. 10-Minute Warning -->
-  <div style="margin-bottom: 14px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
-        3. 10-Minute Warning
-      </label>
-      <button type="button" class="copy-btn" data-target="draft-warn"
-              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
-        📋 Copy
-      </button>
-    </div>
-    <textarea id="draft-warn" readonly rows="3"
-              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.warning }}</textarea>
-  </div>
-
-  <!-- 4. Final Winners Podium -->
-  <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-      <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
-        4. Winners Announcement
-      </label>
-      <button type="button" class="copy-btn" data-target="draft-win"
-              style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
-        📋 Copy
-      </button>
-    </div>
-    <textarea id="draft-win" readonly rows="6"
-              style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; resize: vertical;">{{ drafts.winners }}</textarea>
-  </div>
-</div>
-
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>🏆</h2></div>
-  <div style="text-align: center;"><h2>Reveal Controls & Full Standings</h2></div>
-  <div><h2>🏆</h2></div>
-</div>
-
-{% for slug, cat_name in categories.items() %}
-    <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-        <h3 style="margin-top:0;">{{ cat_name }}</h3>
-        
-        {% if standings[slug] %}
-            <div style="font-size: 0.95em; text-align: left; font-family: sans-serif; background: rgba(0,0,0,0.35); padding: 10px 14px; border-radius: 8px; margin: 10px 0; max-height: 160px; overflow-y: auto; border: 1px solid rgba(255,242,0,0.3);">
-                <b style="color: #FFF200; font-size: 1.1em;">Complete Vote Standings:</b><br>
-                {% for r in standings[slug] %}
-                    {% set rank = loop.index %}
-                    {% set color = '#FFD700' if rank == 1 else ('#C0C0C0' if rank == 2 else ('#CD7F32' if rank == 3 else '#ffffff')) %}
-                    <span style="color: {{ color }}; font-weight: bold;">
-                        {{ rank }}{{ 'st' if rank == 1 else ('nd' if rank == 2 else ('rd' if rank == 3 else 'th')) }}:
-                    </span> 
-                    {{ r['name'] }} &mdash; <b style="color: #FFF200;">{{ r['vote_count'] }} votes</b><br>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p style="font-size: 0.9em; color: #aaa;">No entries in this category yet.</p>
-        {% endif %}
-
-        <p>Currently Revealed on TV: <b>{{ reveal_levels[slug] }} / 3</b></p>
-        <form method="post" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-            <input type="hidden" name="category" value="{{ slug }}">
-            <button name="action" value="reveal_1" class="btn" style="font-size:16px; padding: 10px; width: auto;">Show 3rd</button>
-            <button name="action" value="reveal_2" class="btn" style="font-size:16px; padding: 10px; width: auto;">Show 2nd</button>
-            <button name="action" value="reveal_3" class="btn" style="font-size:16px; padding: 10px; width: auto;">Show 1st</button>
-            <button name="action" value="reveal_0" class="btn" style="font-size:16px; padding: 10px; width: auto; background-color: #ff4444; color: white;">Hide All</button>
-        </form>
-    </div>
-{% endfor %}
-
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>🗑️</h2></div>
-  <div style="text-align: center;"><h2>Manage Entries</h2></div>
-  <div><h2>🗑️</h2></div>
-</div>
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-    {% if not all_entries %}
-        <p style="text-align:center;">No entries yet.</p>
-    {% else %}
-        {% for e in all_entries %}
-            <div style="display: flex; gap: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 14px 0; align-items: flex-start;">
-                
-                <!-- Left: Expanded Thumbnail (Clickable to view full-res in new tab) -->
-                <a href="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" target="_blank" style="display: block; flex-shrink: 0;">
-                    <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" 
-                        style="width: 90px; height: 90px; min-width: 90px; object-fit: cover; border-radius: 8px; border: 1.5px solid #FFF200; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
-                </a>
-
-                <!-- Right: Three-row Stack -->
-                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; gap: 6px; text-align: left;">
-                    
-                    <!-- Row 1: Title + Inline Edit Pencil -->
-                    <div style="font-weight: bold; font-family: sans-serif; font-size: 1.15em; line-height: 1.25; word-break: break-word;">
-                        <span style="color: #FFF200;">{{ e['name'] }}</span>
-                        <button type="button" class="edit-icon-btn" 
-                                data-entry-id="{{ e['id'] }}" 
-                                data-entry-name="{{ e['name'] }}" 
-                                title="Edit Name"
-                                style="background: none; border: none; cursor: pointer; padding: 0 4px; font-size: 0.85em; vertical-align: middle; display: inline-block;">
-                            ✏️
-                        </button>
-                    </div>
-
-                    <!-- Row 2: Category & Live Vote Badge -->
-                    <div style="font-size: 0.85em; color: #ccc; font-family: sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                        <span>{{ e['category'] }}</span>
-                        <span style="background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold; font-size: 0.9em; white-space: nowrap;">
-                            {{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}
-                        </span>
-                    </div>
-
-                    <!-- Row 3: Action Toolbar -->
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px;">
-                        
-                        <!-- 1. Merge Button -->
-                        <button type="button" class="merge-btn"
-                                data-entry-id="{{ e['id'] }}"
-                                data-entry-name="{{ e['name'] }}"
-                                data-entry-category="{{ e['category'] }}"
-                                data-entry-image="{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
-                                style="background-color: #9C27B0; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
-                            ⭄ Merge
-                        </button>
-
-                        <!-- 2. Rotate Form & Button -->
-                        <form method="post" style="margin: 0; display: inline-flex;">
-                            <input type="hidden" name="entry_id" value="{{ e['id'] }}">
-                            <button name="action" value="rotate_entry" 
-                                    style="background-color: #2196F3; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
-                                ↻ Rotate
-                            </button>
-                        </form>
-
-                        <!-- 3. Delete Form & Button -->
-                        <form method="post" style="margin: 0; display: inline-flex;" onsubmit="return confirm('Delete {{ e['name'] }}? This also removes their votes.');">
-                            <input type="hidden" name="entry_id" value="{{ e['id'] }}">
-                            <button name="action" value="delete_entry" 
-                                    style="background-color: #ff4444; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
-
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>📱</h2></div>
-  <div style="text-align: center;"><h2>URL and QR Target </h2></div>
-  <div><h2>📱</h2></div>
-</div>
-
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-  <form method="POST" action="{{ url_for('admin.index') }}" id="qr-form" style="margin: 0; display: flex; flex-direction: column; gap: 12px;">
-    <input type="hidden" name="action" value="generate_qr">
     
-    <div>
-      <input type="url" id="qr_url" name="qr_url" 
-             value="{{ qr_url or 'http://localhost:5000' }}" required
-             placeholder="https://..."
-             style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 16px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; -webkit-appearance: none;">
+    <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 15px 0 20px 0;">
+      <form method="post" style="margin: 0;">
+        <button name="action" value="toggle_submissions" class="btn" style="font-size: 16px; width: auto; padding: 10px 18px; margin: 0;">
+          {{ 'Close Submissions' if submissions_open else 'Open Submissions' }}
+        </button>
+      </form>
+      <form method="post" style="margin: 0;">
+        <button name="action" value="toggle_voting" class="btn" style="font-size: 16px; width: auto; padding: 10px 18px; margin: 0; background-color: {{ '#ff9900' if voting_open else '#FFF200' }};">
+          {{ 'Close Voting' if voting_open else 'Open Voting' }}
+        </button>
+      </form>
     </div>
-    
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <button type="submit" class="btn" 
-              style="flex: 2; min-width: 160px; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin: 0; -webkit-tap-highlight-color: transparent;">
-        Update QR Code
-      </button>
 
-      <button type="button" 
-              onclick="document.getElementById('qr_url').value='http://localhost:5000'; this.form.submit();"
-              style="flex: 1; min-width: 140px; font-weight: bold; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent;">
-        ↺ Localhost
-      </button>
-    </div>
-  </form>
-
-  {% if qr_url %}
-  <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
-    <div style="background: #ffffff; padding: 8px; border-radius: 8px; border: 2px solid #FFF200; display: inline-flex; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-      <img src="{{ url_for('main.serve_qr') }}" alt="QR Code" style="display: block; width: 120px; height: 120px; object-fit: contain;">
-    </div>
-    
-    <div style="font-size: 0.85em; color: #bbb; max-width: 100%; word-break: break-all; padding: 0 4px;">
-      <span style="color: #888;">Active:</span>
-      <a href="{{ qr_url }}" target="_blank" style="color: #FFF200; text-decoration: underline; font-family: monospace; margin-left: 4px;">
-        {{ qr_url }}
+    <div style="text-align: center;">
+      <a href="{{ url_for('tv.tv_dashboard') }}" class="btn" target="_blank" style="background-color: #ff9900; width: 100%; box-sizing: border-box; font-size: 16px; padding: 12px;">
+        📺 Launch TV Dashboard
       </a>
     </div>
   </div>
-  {% endif %}
-</div>
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>🏷️</h2></div>
-  <div style="text-align: center;"><h2>Event Branding</h2></div>
-  <div><h2>🏷️</h2></div>
 </div>
 
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25); font-family: sans-serif;">
-  <form method="POST" action="{{ url_for('admin.index') }}" style="margin: 0; display: flex; flex-direction: column; gap: 14px;">
-    <input type="hidden" name="action" value="update_event_branding">
+<!-- ================= 2. MESSAGE CENTER CARD ================= -->
+<div class="admin-card" id="sec-messages">
+  <div class="card-header" onclick="toggleCard('sec-messages')">
+    <div class="card-title-group">
+      <span>📣</span>
+      <h2>Message Center</h2>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
+    <p style="margin: 0 0 16px 0; font-size: 0.9em; color: #ccc; text-align: center;">
+      Pre-formatted text blasts with live results & links to copy and paste to Partiful or Luma.
+    </p>
 
-    <!-- Row 1: Cursive Accent (Year & Venue) -->
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
-      <div>
-        <label for="event_year" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
-          Year
+    <!-- 1. Submissions Open -->
+    <div style="margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+          1. Submissions Open
         </label>
-        <input type="text" id="event_year" name="event_year" value="{{ branding.event_year }}" required
-               style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; font-family: monospace; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        <button type="button" class="copy-btn" data-target="draft-sub"
+                style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+          📋 Copy
+        </button>
       </div>
-      <div>
-        <label for="event_location" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
-          Venue / Host Tagline
-        </label>
-        <input type="text" id="event_location" name="event_location" value="{{ branding.event_location }}" required
-               style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; font-family: monospace; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
-      </div>
+      <textarea id="draft-sub" readonly
+          style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">{{ drafts.submissions }}</textarea>
     </div>
 
-    <!-- Row 2: Hero Two-Line Title -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-      <div>
-        <label for="event_title_line1" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
-          Hero Line 1 <span style="color: #ff4444;">*</span>
+    <!-- 2. Voting Open -->
+    <div style="margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+          2. Voting Live
         </label>
-        <input type="text" id="event_title_line1" name="event_title_line1" value="{{ branding.event_title_line1 }}" required
-               placeholder="HALLOWEEN"
-               style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        <button type="button" class="copy-btn" data-target="draft-vote"
+                style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+          📋 Copy
+        </button>
       </div>
-      <div>
-        <label for="event_title_line2" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
-          Hero Line 2 <span style="color: #888; font-weight: normal; text-transform: none;">(Optional)</span>
-        </label>
-        <input type="text" id="event_title_line2" name="event_title_line2" value="{{ branding.event_title_line2 }}"
-               placeholder="Leave blank for single line"
-               style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
-      </div>
+      <textarea id="draft-vote" readonly
+          style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">{{ drafts.voting }}</textarea>
     </div>
 
-    <div style="display: flex; justify-content: center; margin-top: 6px;">
-      <button type="submit" class="btn" 
-              style="width: auto; min-width: 180px; font-weight: bold; padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; margin: 0; -webkit-tap-highlight-color: transparent;">
-        Save Branding
-      </button>
+    <!-- 3. 10-Minute Warning -->
+    <div style="margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+          3. 10-Minute Warning
+        </label>
+        <button type="button" class="copy-btn" data-target="draft-warn"
+                style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+          📋 Copy
+        </button>
+      </div>
+      <textarea id="draft-warn" readonly
+          style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">{{ drafts.warning }}</textarea>
     </div>
-  </form>
+
+    <!-- 4. Final Winners Podium -->
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <label style="font-weight: bold; color: #FFF200; font-size: 0.8em; letter-spacing: 0.5px; text-transform: uppercase; font-family: sans-serif;">
+          4. Winners Announcement
+        </label>
+        <button type="button" class="copy-btn" data-target="draft-win"
+                style="background: #FFF200; color: #000; border: none; padding: 5px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; font-family: sans-serif;">
+          📋 Copy
+        </button>
+      </div>
+      <textarea id="draft-win" readonly
+          style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 14px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">{{ drafts.winners }}</textarea>
+    </div>
+  </div>
 </div>
 
-<hr style="border: 1px dashed #FFF200; margin: 30px 0;">
-<div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-  <div><h2>🛠️</h2></div>
-  <div style="text-align: center;"><h2>Danger Zone</h2></div>
-  <div><h2>🛠️</h2></div>
+<!-- ================= 3. REVEAL CONTROLS & STANDINGS CARD ================= -->
+<div class="admin-card" id="sec-standings">
+  <div class="card-header" onclick="toggleCard('sec-standings')">
+    <div class="card-title-group">
+      <span>🏆</span>
+      <h2>Reveal Controls & Standings</h2>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
+    {% for slug, cat_name in categories.items() %}
+      <div style="background: rgba(0,0,0,0.35); padding: 14px; border-radius: 8px; margin-bottom: 16px; border: 1px solid rgba(255, 242, 0, 0.2);">
+        <h3 style="margin: 0 0 10px 0; color: #FFF200;">{{ cat_name }}</h3>
+        
+        {% if standings[slug] %}
+          <div style="font-size: 0.95em; text-align: left; font-family: sans-serif; background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 6px; margin: 8px 0; max-height: 160px; overflow-y: auto; border: 1px solid rgba(255,242,0,0.25);">
+            <b style="color: #FFF200; font-size: 1.05em;">Current Vote Tallies:</b><br>
+            {% for r in standings[slug] %}
+              {% set rank = loop.index %}
+              {% set color = '#FFD700' if rank == 1 else ('#C0C0C0' if rank == 2 else ('#CD7F32' if rank == 3 else '#ffffff')) %}
+              <span style="color: {{ color }}; font-weight: bold;">
+                {{ rank }}{{ 'st' if rank == 1 else ('nd' if rank == 2 else ('rd' if rank == 3 else 'th')) }}:
+              </span> 
+              {{ r['name'] }} &mdash; <b style="color: #FFF200;">{{ r['vote_count'] }} votes</b><br>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="font-size: 0.9em; color: #aaa; margin: 8px 0;">No entries in this category yet.</p>
+        {% endif %}
+
+        <p style="font-size: 0.9em; margin: 10px 0 8px 0;">Currently Revealed on TV: <b>{{ reveal_levels[slug] }} / 3</b></p>
+        
+        <form method="post" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0;">
+          <input type="hidden" name="category" value="{{ slug }}">
+          <button name="action" value="reveal_1" class="btn" style="font-size:14px; padding: 8px 12px; width: auto; margin: 0;">Show 3rd</button>
+          <button name="action" value="reveal_2" class="btn" style="font-size:14px; padding: 8px 12px; width: auto; margin: 0;">Show 2nd</button>
+          <button name="action" value="reveal_3" class="btn" style="font-size:14px; padding: 8px 12px; width: auto; margin: 0;">Show 1st</button>
+          <button name="action" value="reveal_0" class="btn" style="font-size:14px; padding: 8px 12px; width: auto; background-color: #ff4444; color: white; margin: 0;">Hide All</button>
+        </form>
+      </div>
+    {% endfor %}
+  </div>
 </div>
-<div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(255, 242, 0, 0.25);">
-  <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-    <form method="post" onsubmit="return confirm('This will generate 10 random entries and random votes. Proceed?');">
-        <button name="action" value="populate_test_data" class="btn" style="background-color: #4CAF50; color: white; font-size: 18px; border: none; box-shadow: none;">Populate Test Data</button>
+
+<!-- ================= 4. MANAGE ENTRIES CARD ================= -->
+<div class="admin-card" id="sec-entries">
+  <div class="card-header" onclick="toggleCard('sec-entries')">
+    <div class="card-title-group">
+      <span>🖼️</span>
+      <h2>Manage Entries</h2>
+      <span style="background: rgba(255,242,0,0.2); color: #FFF200; font-size: 0.75em; padding: 2px 8px; border-radius: 12px; font-family: sans-serif; font-weight: bold;">
+        {{ all_entries|length }}
+      </span>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
+    {% if not all_entries %}
+      <p style="text-align: center; color: #aaa; margin: 20px 0;">No entries registered yet.</p>
+    {% else %}
+      {% for e in all_entries %}
+        <div style="display: flex; gap: 14px; border-bottom: 1px solid rgba(255, 255, 255, 0.12); padding: 14px 0; align-items: flex-start;">
+          
+          <!-- Left: 90px Thumbnail -->
+          <a href="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" target="_blank" style="display: block; flex-shrink: 0;">
+            <img src="{{ url_for('main.uploaded_file', filename=e['image_path']) }}" 
+                 style="width: 90px; height: 90px; min-width: 90px; object-fit: cover; border-radius: 8px; border: 1.5px solid #FFF200; display: block; box-shadow: 0 4px 8px rgba(0,0,0,0.4);">
+          </a>
+
+          <!-- Right: 3-Row Information & Button Stack -->
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; gap: 6px; text-align: left;">
+            
+            <!-- Row 1: Title + Inline Edit Pencil -->
+            <div style="font-weight: bold; font-family: sans-serif; font-size: 1.15em; line-height: 1.25; word-break: break-word;">
+              <span style="color: #FFF200;">{{ e['name'] }}</span>
+              <button type="button" class="edit-icon-btn" 
+                      data-entry-id="{{ e['id'] }}" 
+                      data-entry-name="{{ e['name'] }}" 
+                      title="Edit Name"
+                      style="background: none; border: none; cursor: pointer; padding: 0 4px; font-size: 0.85em; vertical-align: middle; display: inline-block;">
+                ✏️
+              </button>
+            </div>
+
+            <!-- Row 2: Category & Live Vote Badge -->
+            <div style="font-size: 0.85em; color: #ccc; font-family: sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span>{{ e['category'] }}</span>
+              <span style="background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 4px; border: 1px solid #FFF200; color: #FFF200; font-weight: bold; font-size: 0.9em; white-space: nowrap;">
+                {{ e['vote_count'] }} {{ 'vote' if e['vote_count'] == 1 else 'votes' }}
+              </span>
+            </div>
+
+            <!-- Row 3: Action Toolbar (Pixel-locked 28px) -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px;">
+              <button type="button" class="merge-btn"
+                      data-entry-id="{{ e['id'] }}"
+                      data-entry-name="{{ e['name'] }}"
+                      data-entry-category="{{ e['category'] }}"
+                      data-entry-image="{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
+                      style="background-color: #9C27B0; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                ⭄ Merge
+              </button>
+
+              <form method="post" style="margin: 0; display: inline-flex;">
+                <input type="hidden" name="entry_id" value="{{ e['id'] }}">
+                <button name="action" value="rotate_entry" 
+                        style="background-color: #2196F3; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                  ↻ Rotate
+                </button>
+              </form>
+
+              <form method="post" style="margin: 0; display: inline-flex;" onsubmit="return confirm('Delete {{ e['name'] }}? This also removes their votes.');">
+                <input type="hidden" name="entry_id" value="{{ e['id'] }}">
+                <button name="action" value="delete_entry" 
+                        style="background-color: #ff4444; color: white; border: none; height: 28px; padding: 0 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; font-family: sans-serif; display: inline-flex; align-items: center; justify-content: center; line-height: 1; box-sizing: border-box; -webkit-tap-highlight-color: transparent;">
+                  Delete
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= 5. URL & QR TARGET CARD ================= -->
+<div class="admin-card" id="sec-qr">
+  <div class="card-header" onclick="toggleCard('sec-qr')">
+    <div class="card-title-group">
+      <span>📱</span>
+      <h2>Portal URL & QR Target</h2>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('admin.index') }}" id="qr-form" style="margin: 0; display: flex; flex-direction: column; gap: 12px;">
+      <input type="hidden" name="action" value="generate_qr">
+      
+      <div>
+        <input type="url" id="qr_url" name="qr_url" 
+               value="{{ qr_url or 'http://localhost:5000' }}" required
+               placeholder="https://..."
+               style="width: 100%; box-sizing: border-box; padding: 12px; font-size: 15px; font-family: monospace; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none; -webkit-appearance: none;">
+      </div>
+      
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="submit" class="btn" 
+                style="flex: 2; min-width: 160px; font-weight: bold; padding: 12px; border: none; border-radius: 6px; cursor: pointer; margin: 0; -webkit-tap-highlight-color: transparent;">
+          Update QR Code
+        </button>
+
+        <button type="button" 
+                onclick="document.getElementById('qr_url').value='http://localhost:5000'; this.form.submit();"
+                style="flex: 1; min-width: 130px; font-weight: bold; padding: 12px; background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; cursor: pointer; font-size: 14px; -webkit-tap-highlight-color: transparent; font-family: sans-serif;">
+          ↺ Localhost
+        </button>
+      </div>
     </form>
-    <form action="{{ url_for('admin.reset') }}" method="post" onsubmit="return confirm('WARNING: This deletes all photos and votes! Are you sure?');">
-        <button class="btn" style="background-color: #ff4444; color: white; font-size: 18px; border: none; box-shadow: none;">RESET ALL DATA</button>
+
+    {% if qr_url %}
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+      <div style="background: #ffffff; padding: 8px; border-radius: 8px; border: 2px solid #FFF200; display: inline-flex; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <img src="{{ url_for('main.serve_qr') }}" alt="QR Code" style="display: block; width: 120px; height: 120px; object-fit: contain;">
+      </div>
+      
+      <div style="font-size: 0.85em; color: #bbb; max-width: 100%; word-break: break-all; padding: 0 4px; font-family: sans-serif;">
+        <span style="color: #888;">Broadcasted URL:</span>
+        <a href="{{ qr_url }}" target="_blank" style="color: #FFF200; text-decoration: underline; font-family: monospace; margin-left: 4px;">
+          {{ qr_url }}
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ================= 6. EVENT BRANDING CARD ================= -->
+<div class="admin-card" id="sec-branding">
+  <div class="card-header" onclick="toggleCard('sec-branding')">
+    <div class="card-title-group">
+      <span>🏷️</span>
+      <h2>Event Branding</h2>
+    </div>
+    <span class="card-toggle-icon">▲</span>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('admin.index') }}" style="margin: 0; display: flex; flex-direction: column; gap: 14px; font-family: sans-serif;">
+      <input type="hidden" name="action" value="update_event_branding">
+
+      <!-- Row 1: Cursive Accent (Year & Venue) -->
+      <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+        <div>
+          <label for="event_year" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
+            Year
+          </label>
+          <input type="text" id="event_year" name="event_year" value="{{ branding.event_year }}" required
+                 style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; font-family: monospace; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        </div>
+        <div>
+          <label for="event_location" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
+            Venue / Host Tagline
+          </label>
+          <input type="text" id="event_location" name="event_location" value="{{ branding.event_location }}" required
+                 style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; font-family: monospace; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        </div>
+      </div>
+
+      <!-- Row 2: Hero Title -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+          <label for="event_title_line1" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
+            Hero Line 1 <span style="color: #ff4444;">*</span>
+          </label>
+          <input type="text" id="event_title_line1" name="event_title_line1" value="{{ branding.event_title_line1 }}" required
+                 placeholder="HALLOWEEN"
+                 style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        </div>
+        <div>
+          <label for="event_title_line2" style="display: block; font-weight: bold; color: #FFF200; font-size: 0.8em; margin-bottom: 4px; text-transform: uppercase;">
+            Hero Line 2 <span style="color: #888; font-weight: normal; text-transform: none;">(Optional)</span>
+          </label>
+          <input type="text" id="event_title_line2" name="event_title_line2" value="{{ branding.event_title_line2 }}"
+                 placeholder="Blank for single line"
+                 style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; margin-top: 4px;">
+        <button type="submit" class="btn" 
+                style="width: auto; min-width: 180px; font-weight: bold; padding: 12px 28px; border: none; border-radius: 6px; cursor: pointer; margin: 0; -webkit-tap-highlight-color: transparent;">
+          Save Branding
+        </button>
+      </div>
     </form>
   </div>
 </div>
 
+<!-- ================= 7. DANGER ZONE CARD ================= -->
+<div class="admin-card" id="sec-danger" style="border-color: rgba(255, 68, 68, 0.4);">
+  <div class="card-header" onclick="toggleCard('sec-danger')" style="background: rgba(255, 68, 68, 0.1);">
+    <div class="card-title-group" style="color: #ff4444;">
+      <span>🛠️</span>
+      <h2 style="color: #ff4444;">Danger Zone</h2>
+    </div>
+    <span class="card-toggle-icon" style="color: #ff4444;">▲</span>
+  </div>
+  <div class="card-body">
+    <p style="margin: 0 0 16px 0; font-size: 0.85em; color: #ccc; text-align: center; font-family: sans-serif;">
+      Operations here permanently alter contest database records and uploaded media.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <form method="post" onsubmit="return confirm('This will generate 10 random entries and random votes. Proceed?');" style="margin: 0;">
+        <button name="action" value="populate_test_data" class="btn" style="background-color: #4CAF50; color: white; font-size: 16px; border: none; padding: 10px 18px; margin: 0;">
+          Populate Test Data
+        </button>
+      </form>
+      <form action="{{ url_for('admin.reset') }}" method="post" onsubmit="return confirm('WARNING: This permanently deletes ALL photos and votes! Proceed?');" style="margin: 0;">
+        <button class="btn" style="background-color: #ff4444; color: white; font-size: 16px; border: none; padding: 10px 18px; margin: 0;">
+          RESET ALL DATA
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FLOATING BACK TO TOP BUTTON ================= -->
+<button id="back-to-top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" title="Back to top">
+  ▲
+</button>
+
 <!-- ================= EDIT ENTRY NAME MODAL ================= -->
 <div id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;">
-    <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Edit Entry Name</h3>
-            <button type="button" onclick="closeEditModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
-        </div>
-        <form id="edit-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
-            <input type="hidden" name="action" value="update_entry_name">
-            <input type="hidden" id="edit-entry-id" name="entry_id">
-            <div style="margin-bottom: 20px;">
-                <label for="edit-entry-name" style="display: block; margin-bottom: 8px; color: #fff; font-weight: bold; font-family: sans-serif; font-size: 0.9em;">Name</label>
-                <input type="text" id="edit-entry-name" name="new_name" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.5); color: #fff; font-size: 16px; outline: none;" required>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button type="button" onclick="closeEditModal()" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Cancel</button>
-                <button type="submit" style="background: #FFF200; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Save Changes</button>
-            </div>
-        </form>
+  <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Edit Entry Name</h3>
+      <button type="button" onclick="closeEditModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
     </div>
+    <form id="edit-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
+      <input type="hidden" name="action" value="update_entry_name">
+      <input type="hidden" id="edit-entry-id" name="entry_id">
+      <div style="margin-bottom: 20px;">
+        <label for="edit-entry-name" style="display: block; margin-bottom: 8px; color: #fff; font-weight: bold; font-family: sans-serif; font-size: 0.9em;">Name</label>
+        <input type="text" id="edit-entry-name" name="new_name" style="width: 100%; box-sizing: border-box; padding: 12px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.5); color: #fff; font-size: 16px; outline: none;" required>
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" onclick="closeEditModal()" style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Cancel</button>
+        <button type="submit" style="background: #FFF200; color: #000; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-family: sans-serif;">Save Changes</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- ================= MERGE ENTRIES MODAL ================= -->
 <div id="merge-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;">
-    <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200; font-family: sans-serif;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Combine Duplicate Entries</h3>
-            <button type="button" onclick="closeMergeModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
+  <div style="background: #1e1e1e; padding: 24px; border-radius: 10px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #FFF200; font-family: sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="color: #FFF200; margin: 0; font-size: 1.3em;">Combine Duplicate Entries</h3>
+      <button type="button" onclick="closeMergeModal()" style="background: none; border: none; color: #ccc; font-size: 1.6em; cursor: pointer; line-height: 1;">×</button>
+    </div>
+
+    <form id="merge-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
+      <input type="hidden" name="action" value="merge_entries">
+      <input type="hidden" id="merge-primary-id" name="primary_id">
+
+      <!-- Step 1: Select Duplicate to Absorb -->
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+          Select duplicate entry to absorb:
+        </label>
+        <select id="merge-secondary-id" name="secondary_id" required
+                style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
+        </select>
+        <p id="merge-no-candidates" style="display: none; color: #ff9900; font-size: 0.85em; margin: 6px 0 0 0;">
+          No other entries found in this category to combine with.
+        </p>
+      </div>
+
+      <div id="merge-options-container" style="display: none;">
+        <!-- Step 2: Choose Surviving Name -->
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+            Which title should survive?
+          </label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
+              <input type="radio" name="keep_name" value="primary" checked>
+              <span id="label-name-primary" style="font-weight: bold;"></span> (This Entry)
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
+              <input type="radio" name="keep_name" value="secondary">
+              <span id="label-name-secondary" style="font-weight: bold;"></span> (Duplicate)
+            </label>
+          </div>
         </div>
 
-        <form id="merge-form" method="post" action="{{ url_for('admin.index') }}" style="margin: 0;">
-            <input type="hidden" name="action" value="merge_entries">
-            <input type="hidden" id="merge-primary-id" name="primary_id">
+        <!-- Step 3: Choose Surviving Photo -->
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
+            Which photo should survive?
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
+              <img id="img-preview-primary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="radio" name="keep_photo" value="primary" checked>
+                <span style="font-size: 0.85em; color: #fff;">Photo A</span>
+              </div>
+            </label>
+            <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
+              <img id="img-preview-secondary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="radio" name="keep_photo" value="secondary">
+                <span style="font-size: 0.85em; color: #fff;">Photo B</span>
+              </div>
+            </label>
+          </div>
+        </div>
 
-            <!-- Step 1: Select Duplicate to Absorb -->
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
-                    Select duplicate entry to absorb:
-                </label>
-                <select id="merge-secondary-id" name="secondary_id" required
-                        style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255, 242, 0, 0.4); border-radius: 6px; outline: none;">
-                </select>
-                <p id="merge-no-candidates" style="display: none; color: #ff9900; font-size: 0.85em; margin: 6px 0 0 0;">
-                    No other entries found in this category to combine with.
-                </p>
-            </div>
+        <div style="background: rgba(255,242,0,0.1); border-left: 3px solid #FFF200; padding: 8px 12px; margin-bottom: 20px; font-size: 0.8em; color: #ddd;">
+          Votes will be merged. Any guest who voted for both entries will only count once.
+        </div>
 
-            <div id="merge-options-container" style="display: none;">
-                <!-- Step 2: Choose Surviving Name -->
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 6px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
-                        Which title should survive?
-                    </label>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
-                            <input type="radio" name="keep_name" value="primary" checked>
-                            <span id="label-name-primary" style="font-weight: bold;"></span> (This Entry)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 8px; color: #fff; cursor: pointer; font-size: 0.95em;">
-                            <input type="radio" name="keep_name" value="secondary">
-                            <span id="label-name-secondary" style="font-weight: bold;"></span> (Duplicate)
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Step 3: Choose Surviving Photo -->
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #FFF200; font-weight: bold; font-size: 0.85em; text-transform: uppercase;">
-                        Which photo should survive?
-                    </label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <!-- Primary Photo Option -->
-                        <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
-                            <img id="img-preview-primary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <input type="radio" name="keep_photo" value="primary" checked>
-                                <span style="font-size: 0.85em; color: #fff;">Photo A</span>
-                            </div>
-                        </label>
-                        <!-- Secondary Photo Option -->
-                        <label style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; border: 1px solid #555; background: rgba(0,0,0,0.3); cursor: pointer;">
-                            <img id="img-preview-secondary" src="" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #FFF200;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <input type="radio" name="keep_photo" value="secondary">
-                                <span style="font-size: 0.85em; color: #fff;">Photo B</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <div style="background: rgba(255,242,0,0.1); border-left: 3px solid #FFF200; padding: 8px 12px; margin-bottom: 20px; font-size: 0.8em; color: #ddd;">
-                    Votes from both entries will be summed. Any guests who voted for both will have their duplicate vote removed automatically.
-                </div>
-
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button type="button" onclick="closeMergeModal()" 
-                            style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        Cancel
-                    </button>
-                    <button type="submit" 
-                            style="background: #9C27B0; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
-                        Combine & Merge
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+          <button type="button" onclick="closeMergeModal()" 
+                  style="background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #555; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            Cancel
+          </button>
+          <button type="submit" 
+                  style="background: #9C27B0; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+            Combine & Merge
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function(event) { 
-        var scrollpos = sessionStorage.getItem("scrollpos");
-        if (scrollpos) window.scrollTo(0, scrollpos);
+  // 1. Persistence helpers for collapsed card states
+  function getCollapsedCards() {
+    try {
+      return JSON.parse(localStorage.getItem('admin_collapsed_cards')) || [];
+    } catch (e) {
+      return [];
+    }
+  }
 
-        // Embed entry records for fast modal population
-        var allEntriesData = [
-            {% for e in all_entries %}
-            {
-                id: "{{ e['id'] }}",
-                name: {{ e['name']|tojson }},
-                category: {{ e['category']|tojson }},
-                image: "{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
-            }{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ];
+  function saveCollapsedCards(list) {
+    try {
+      localStorage.setItem('admin_collapsed_cards', JSON.stringify(list));
+    } catch (e) {}
+  }
 
-        // Merge Modal Open Trigger
-        document.querySelectorAll(".merge-btn").forEach(function(btn) {
-            btn.addEventListener("click", function() {
-                var primaryId = this.getAttribute("data-entry-id");
-                var primaryName = this.getAttribute("data-entry-name");
-                var primaryCategory = this.getAttribute("data-entry-category");
-                var primaryImage = this.getAttribute("data-entry-image");
+  // 2. Card toggle with automatic storage sync
+  function toggleCard(cardId) {
+    var card = document.getElementById(cardId);
+    if (!card) return;
+    card.classList.toggle('collapsed');
 
-                document.getElementById("merge-primary-id").value = primaryId;
-                document.getElementById("label-name-primary").textContent = primaryName;
-                document.getElementById("img-preview-primary").src = primaryImage;
+    var collapsed = getCollapsedCards();
+    if (card.classList.contains('collapsed')) {
+      if (!collapsed.includes(cardId)) collapsed.push(cardId);
+    } else {
+      collapsed = collapsed.filter(function(id) { return id !== cardId; });
+      if (cardId === 'sec-messages' && typeof autoResizeMessageDrafts === 'function') {
+        setTimeout(autoResizeMessageDrafts, 50);
+      }
+    }
+    saveCollapsedCards(collapsed);
+  }
 
-                // Populate secondary select with entries from same category
-                var select = document.getElementById("merge-secondary-id");
-                select.innerHTML = '<option value="">-- Choose duplicate entry --</option>';
+  // Auto-resize textareas to perfectly fit content
+  function autoResizeMessageDrafts() {
+    document.querySelectorAll('#sec-messages textarea').forEach(function(ta) {
+      ta.style.height = 'auto';
+      ta.style.height = (ta.scrollHeight + 4) + 'px';
+    });
+  }
 
-                var candidates = allEntriesData.filter(function(item) {
-                    return item.category === primaryCategory && item.id !== primaryId;
-                });
-
-                if (candidates.length === 0) {
-                    select.style.display = "none";
-                    document.getElementById("merge-no-candidates").style.display = "block";
-                    document.getElementById("merge-options-container").style.display = "none";
-                } else {
-                    select.style.display = "block";
-                    document.getElementById("merge-no-candidates").style.display = "none";
-
-                    candidates.forEach(function(item) {
-                        var opt = document.createElement("option");
-                        opt.value = item.id;
-                        opt.textContent = item.name + " (ID #" + item.id + ")";
-                        select.appendChild(opt);
-                    });
-                }
-
-                document.getElementById("merge-modal").style.display = "flex";
-            });
-        });
-
-        // Dynamic update when secondary entry is selected
-        document.getElementById("merge-secondary-id").addEventListener("change", function() {
-            var selectedId = this.value;
-            var container = document.getElementById("merge-options-container");
-
-            if (!selectedId) {
-                container.style.display = "none";
-                return;
-            }
-
-            var secondary = allEntriesData.find(function(item) {
-                return item.id === selectedId;
-            });
-
-            if (secondary) {
-                document.getElementById("label-name-secondary").textContent = secondary.name;
-                document.getElementById("img-preview-secondary").src = secondary.image;
-                container.style.display = "block";
-            }
-        });
-
-        window.closeMergeModal = function() {
-            document.getElementById("merge-modal").style.display = "none";
-            document.getElementById("merge-options-container").style.display = "none";
-        };
-
-        // Close on dark backdrop click
-        var mergeModal = document.getElementById("merge-modal");
-        mergeModal.addEventListener("click", function(e) {
-            if (e.target === mergeModal) {
-                closeMergeModal();
-            }
-        });
-
-        // Copy button handler with feedback
-        document.querySelectorAll('.copy-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var targetId = this.getAttribute('data-target');
-                var textarea = document.getElementById(targetId);
-                if (!textarea) return;
-
-                function setCopiedState() {
-                    var originalText = btn.innerHTML;
-                    btn.innerHTML = '✓ Copied!';
-                    btn.style.backgroundColor = '#4CAF50';
-                    btn.style.color = '#ffffff';
-                    setTimeout(function() {
-                        btn.innerHTML = originalText;
-                        btn.style.backgroundColor = '#FFF200';
-                        btn.style.color = '#000000';
-                    }, 2000);
-                }
-
-                if (navigator.clipboard && window.isSecureContext) {
-                    navigator.clipboard.writeText(textarea.value).then(setCopiedState).catch(function() {
-                        textarea.select();
-                        document.execCommand('copy');
-                        setCopiedState();
-                    });
-                } else {
-                    textarea.select();
-                    document.execCommand('copy');
-                    setCopiedState();
-                }
-            });
-        });
-
-        // Edit Entry Name Modal functionality
-        document.querySelectorAll(".edit-icon-btn").forEach(function(btn) {
-            btn.addEventListener("click", function() {
-                var entryId = this.getAttribute("data-entry-id");
-                var entryName = this.getAttribute("data-entry-name");
-                
-                document.getElementById("edit-entry-id").value = entryId;
-                document.getElementById("edit-entry-name").value = entryName;
-                document.getElementById("edit-modal").style.display = "flex";
-                document.getElementById("edit-entry-name").focus();
-            });
-        });
-
-        window.closeEditModal = function() {
-            document.getElementById("edit-modal").style.display = "none";
-        };
-
-        // Close modal when clicking the dark backdrop
-        var modal = document.getElementById("edit-modal");
-        modal.addEventListener("click", function(e) {
-            if (e.target === modal) {
-                closeEditModal();
-            }
-        });
+  document.addEventListener("DOMContentLoaded", function(event) { 
+    // STEP A: Restore collapsed card states FIRST so page height matches pre-reload
+    var collapsed = getCollapsedCards();
+    collapsed.forEach(function(cardId) {
+      var card = document.getElementById(cardId);
+      if (card) {
+        card.classList.add('collapsed');
+      }
     });
 
-    window.onbeforeunload = function(e) {
-        sessionStorage.setItem("scrollpos", window.scrollY);
+    // STEP B: Auto-fit textareas if Message Center is currently open
+    autoResizeMessageDrafts();
+    window.addEventListener('resize', autoResizeMessageDrafts);
+
+    // STEP C: Restore scroll position AFTER page geometry is guaranteed identical
+    var scrollpos = sessionStorage.getItem("scrollpos");
+    if (scrollpos) {
+      requestAnimationFrame(function() {
+        window.scrollTo(0, parseInt(scrollpos, 10));
+      });
+    }
+
+    // Floating Back to Top button listener
+    var topBtn = document.getElementById("back-to-top");
+    window.addEventListener("scroll", function() {
+      if (window.scrollY > 300) {
+        topBtn.style.display = "flex";
+      } else {
+        topBtn.style.display = "none";
+      }
+    });
+
+    // Quick-nav pill click: expand card, update storage, and smooth scroll
+    document.querySelectorAll(".nav-pill").forEach(function(pill) {
+      pill.addEventListener("click", function(e) {
+        var targetId = this.getAttribute("href").substring(1);
+        var targetCard = document.getElementById(targetId);
+        if (targetCard && targetCard.classList.contains("collapsed")) {
+          targetCard.classList.remove("collapsed");
+          var updated = getCollapsedCards().filter(function(id) { return id !== targetId; });
+          saveCollapsedCards(updated);
+          if (targetId === 'sec-messages') setTimeout(autoResizeMessageDrafts, 50);
+        }
+      });
+    });
+
+    // Embed entry records for fast modal population
+    var allEntriesData = [
+      {% for e in all_entries %}
+      {
+        id: "{{ e['id'] }}",
+        name: {{ e['name']|tojson }},
+        category: {{ e['category']|tojson }},
+        image: "{{ url_for('main.uploaded_file', filename=e['image_path']) }}"
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    // Merge Modal Open Trigger
+    document.querySelectorAll(".merge-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var primaryId = this.getAttribute("data-entry-id");
+        var primaryName = this.getAttribute("data-entry-name");
+        var primaryCategory = this.getAttribute("data-entry-category");
+        var primaryImage = this.getAttribute("data-entry-image");
+
+        document.getElementById("merge-primary-id").value = primaryId;
+        document.getElementById("label-name-primary").textContent = primaryName;
+        document.getElementById("img-preview-primary").src = primaryImage;
+
+        var select = document.getElementById("merge-secondary-id");
+        select.innerHTML = '<option value="">-- Choose duplicate entry --</option>';
+
+        var candidates = allEntriesData.filter(function(item) {
+          return item.category === primaryCategory && item.id !== primaryId;
+        });
+
+        if (candidates.length === 0) {
+          select.style.display = "none";
+          document.getElementById("merge-no-candidates").style.display = "block";
+          document.getElementById("merge-options-container").style.display = "none";
+        } else {
+          select.style.display = "block";
+          document.getElementById("merge-no-candidates").style.display = "none";
+
+          candidates.forEach(function(item) {
+            var opt = document.createElement("option");
+            opt.value = item.id;
+            opt.textContent = item.name + " (ID #" + item.id + ")";
+            select.appendChild(opt);
+          });
+        }
+
+        document.getElementById("merge-modal").style.display = "flex";
+      });
+    });
+
+    // Secondary select change in merge modal
+    document.getElementById("merge-secondary-id").addEventListener("change", function() {
+      var selectedId = this.value;
+      var container = document.getElementById("merge-options-container");
+
+      if (!selectedId) {
+        container.style.display = "none";
+        return;
+      }
+
+      var secondary = allEntriesData.find(function(item) {
+        return item.id === selectedId;
+      });
+
+      if (secondary) {
+        document.getElementById("label-name-secondary").textContent = secondary.name;
+        document.getElementById("img-preview-secondary").src = secondary.image;
+        container.style.display = "block";
+      }
+    });
+
+    window.closeMergeModal = function() {
+      document.getElementById("merge-modal").style.display = "none";
+      document.getElementById("merge-options-container").style.display = "none";
     };
+
+    var mergeModal = document.getElementById("merge-modal");
+    mergeModal.addEventListener("click", function(e) {
+      if (e.target === mergeModal) closeMergeModal();
+    });
+
+    // Copy to clipboard with visual feedback
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var targetId = this.getAttribute('data-target');
+        var textarea = document.getElementById(targetId);
+        if (!textarea) return;
+
+        function setCopiedState() {
+          var originalText = btn.innerHTML;
+          btn.innerHTML = '✓ Copied!';
+          btn.style.backgroundColor = '#4CAF50';
+          btn.style.color = '#ffffff';
+          setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.style.backgroundColor = '#FFF200';
+            btn.style.color = '#000000';
+          }, 2000);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(textarea.value).then(setCopiedState).catch(function() {
+            textarea.select();
+            document.execCommand('copy');
+            setCopiedState();
+          });
+        } else {
+          textarea.select();
+          document.execCommand('copy');
+          setCopiedState();
+        }
+      });
+    });
+
+    // Edit Name Modal
+    document.querySelectorAll(".edit-icon-btn").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var entryId = this.getAttribute("data-entry-id");
+        var entryName = this.getAttribute("data-entry-name");
+        
+        document.getElementById("edit-entry-id").value = entryId;
+        document.getElementById("edit-entry-name").value = entryName;
+        document.getElementById("edit-modal").style.display = "flex";
+        document.getElementById("edit-entry-name").focus();
+      });
+    });
+
+    window.closeEditModal = function() {
+      document.getElementById("edit-modal").style.display = "none";
+    };
+
+    var modal = document.getElementById("edit-modal");
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) closeEditModal();
+    });
+  });
+
+  window.onbeforeunload = function(e) {
+    sessionStorage.setItem("scrollpos", window.scrollY);
+  };
 </script>
 {% endblock %}

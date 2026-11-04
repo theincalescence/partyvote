@@ -11,32 +11,32 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 logger = logging.getLogger(__name__)
 
 
-def build_broadcast_drafts(categories, standings, target_url):
+def build_broadcast_drafts(categories, standings, target_url, event_slug):
     url = target_url or "http://localhost:5000"
 
     # 1. Submissions Open
     draft_submissions = (
-        f"🎃 Costume & Pumpkin submissions are OPEN! "
+        f"🎃 {event_slug}: Costume & Pumpkin submissions are OPEN! "
         f"Snap a picture and upload your entry here: {url} "
         f"(or scan the TV screen) before submissions lock!"
     )
 
     # 2. Voting Live
     draft_voting = (
-        f"👻 Voting is officially LIVE! "
+        f"👻 {event_slug}: Voting is officially LIVE! "
         f"Check out all the entries and cast your ballots now: {url}\n"
         f"May the best costume and pumpkin win!"
     )
 
     # 3. 10-Minute Warning
     draft_warning = (
-        f"⏳ Final call! Voting closes in 10 minutes! "
+        f"⏳ {event_slug}: Final call! Voting closes in 10 minutes! "
         f"Get your votes in now at {url} before the polls lock."
     )
 
     # 4. Winners Podium (built directly from category standings)
     medals = ["🥇", "🥈", "🥉"]
-    winner_lines = ["🏆 RouwenRick Manor: The winners are officially crowned!"]
+    winner_lines = [f"🏆 {event_slug}: The winners are officially crowned!"]
     has_standings = False
 
     for slug, cat_name in categories.items():
@@ -315,7 +315,7 @@ def index():
         # Build Partiful broadcast drafts using live URL and calculated standings
         branding = get_event_branding()
         event_slug = f"{branding['event_location']}" # e.g. "RouwenRick Manor"
-        drafts = build_broadcast_drafts(categories, standings, current_qr_url)
+        drafts = build_broadcast_drafts(categories, standings, current_qr_url, event_slug)
         
         logger.info("Admin dashboard rendered successfully")
         return render_template(

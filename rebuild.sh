@@ -26,4 +26,4 @@ if ! docker compose up -d; then
     exit 1
 fi
 
-echo "Docker container rebuild completed successfully!"
+echo "Docker container rebuild completed successfully!" 
